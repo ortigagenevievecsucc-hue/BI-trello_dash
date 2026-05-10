@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoodDeal MCD — BI Executive Dashboard</title>
+<style>
+:root{
+  --brand: #FF4500; --brand-dark: #E63E00; --navy: #0F172A;
+  --bg: #F1F5F9; --surface: #FFFFFF; --border: #E2E8F0;
+  --text: #1E293B; --text-muted: #64748B;
+  --success: #10B981; --danger: #EF4444;
+  --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  --radius: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter', sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{position:fixed; left:0; top:0; bottom:0; width:260px; background:var(--navy); z-index:100; box-shadow: 4px 0 20px rgba(0,0,0,0.1)}
+.sb-logo{padding:30px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05)}
+.sb-logo img{width:42px; height:42px; border-radius:10px}
+.sb-logo h2{color:#fff; font-size:16px; font-weight:800; letter-spacing:-0.03em}
+.sb-nav{padding:20px 15px; flex:1}
+.nav-item{display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px; color:rgba(255,255,255,0.6); text-decoration:none; margin-bottom:4px; font-size:14px; cursor:pointer; transition:0.2s; user-select:none;}
+.nav-item:hover, .nav-item.active{background:rgba(255,255,255,0.08); color:#fff}
+.nav-item.active{background:var(--brand); box-shadow: 0 4px 15px rgba(255,69,0,0.3)}
+
+/* MAIN */
+.main{margin-left:260px; padding-bottom:60px}
+.topbar{background:rgba(255,255,255,0.9); backdrop-filter:blur(8px); height:75px; padding:0 35px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:90; border-bottom:1px solid var(--border)}
+
+/* KPI GRID */
+.kpi-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; padding:25px 35px}
+.kpi-card{background:var(--surface); padding:20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); position:relative; overflow:hidden; user-select:none;}
+.kpi-card::after{content:''; position:absolute; left:0; top:0; height:100%; width:4px; background:var(--brand)}
+.kpi-lbl{font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px}
+.kpi-val{font-size:20px; font-weight:800; color:var(--navy); margin-bottom:4px; white-space: nowrap;}
+.kpi-sub{font-size:11px; color:var(--text-muted)}
+
+/* PANELS */
+.content{padding:0 35px}
+.panel{background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:25px; overflow:hidden}
+.ph{padding:18px 25px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(248,250,252,0.5); user-select:none;}
+.ph h3{font-size:14px; font-weight:700}
+
+.grid-3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:25px; margin-bottom:25px}
+
+/* TABLES */
+table{width:100%; border-collapse:collapse}
+th{text-align:left; padding:12px 20px; background:var(--bg); font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; white-space:nowrap}
+td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:12px}
+.tr-total td{background:var(--bg); font-weight:800; border-top:2px solid var(--border); color:var(--navy)}
+
+/* BAR LISTS */
+.bar-item{padding:12px 20px; border-bottom:1px solid var(--bg); display:flex; flex-direction:column; gap:6px}
+.bar-item-total{background:rgba(241, 245, 249, 0.5); border-top: 1px solid var(--border); border-bottom: none;}
+.bar-top{display:flex; justify-content:space-between; align-items:center}
+.bar-label{font-size:11px; font-weight:700; color:var(--navy); text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:65%}
+.bar-count{font-size:10px; font-weight:700; color:var(--text-muted)}
+.bar-track{width:100%; height:6px; background:var(--bg); border-radius:10px; overflow:hidden}
+.bar-fill{height:100%; background:var(--brand); border-radius:10px}
+.bar-bottom{display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700}
+.bar-amt{color:var(--brand)}
+.bar-pct{color:var(--text-muted)}
+
+.btn-group{display:flex; gap:10px; align-items:center}
+.btn{background:var(--brand); color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition: 0.2s; user-select:none;}
+.btn:hover{background:var(--brand-dark)}
+.btn-outline{background:white; color:var(--navy); border:1px solid var(--border)}
+
+.month-picker{display:flex; align-items:center; gap:10px; background:white; padding:5px 12px; border-radius:8px; border:1px solid var(--border); user-select:none;}
+#cfg-modal{display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:1000; align-items:center; justify-content:center}
+#refresh-indicator{font-size:10px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sb-logo">
+        <img src="https://ui-avatars.com/api/?name=GD&background=FF4500&color=fff&bold=true" alt="Logo">
+        <h2>GFI BI Dashboard</h2>
+    </div>
+    <nav class="sb-nav">
+        <div class="nav-item active" id="nav-alltime" onclick="switchTab('alltime')">Executive Overview</div>
+        <div class="nav-item" id="nav-monthly" onclick="switchTab('monthly')">Monthly Performance</div>
+        <div style="margin-top:20px; padding:0 16px; font-size:10px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase">Settings</div>
+        <div class="nav-item" onclick="showCfg()">API Configuration</div>
+    </nav>
+</aside>
+
+<main class="main">
+    <header class="topbar">
+        <h1 id="view-title">Executive Overview</h1>
+        <div class="btn-group">
+            <div id="refresh-indicator">Syncing...</div>
+            <div id="month-selector" class="month-picker" style="display:none">
+                <button onclick="changeMonth(-1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold">◀</button>
+                <span id="current-month-display" style="font-weight:700; font-size:13px; min-width:100px; text-align:center">May 2026</span>
+                <button onclick="changeMonth(1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold">▶</button>
+            </div>
+            <button class="btn btn-outline" onclick="exportData()">Export CSV</button>
+            <button class="btn" onclick="loadAll()">Sync Data</button>
+        </div>
+    </header>
+
+    <div id="kpi-grid" class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-lbl">Accounts Released</div><div class="kpi-val" id="kpi-rel-count">0</div><div class="kpi-sub">Total funded units</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Prod. Accounts</div><div class="kpi-val" id="kpi-prod-count">0</div><div class="kpi-sub">Active approved pipeline</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Released Conversion</div><div class="kpi-val" id="kpi-conv">0%</div><div class="kpi-sub">Released vs Prod. Approved</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Avg. Org. TAT</div><div class="kpi-val" id="kpi-vel">0 Days</div><div class="kpi-sub">Receive → Fulfilled speed</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Amount Released</div><div class="kpi-val" id="kpi-rel-vol">₱0</div><div class="kpi-sub">Actual capital deployed</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Total Production</div><div class="kpi-val" id="kpi-prod-vol">₱0</div><div class="kpi-sub">Pipeline potential</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Avg. Release Size</div><div class="kpi-val" id="kpi-avg-size">₱0</div><div class="kpi-sub">Revenue per unit</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Total PN Value</div><div class="kpi-val" id="kpi-pn-vol">₱0</div><div class="kpi-sub">Total PN value</div></div>
+    </div>
+
+    <div class="content">
+        <div class="panel">
+            <div class="ph"><h3 id="chart-panel-title">Monthly Released Trend</h3></div>
+            <div style="padding:20px"><canvas id="mainChart" style="width:100%; height:280px"></canvas></div>
+        </div>
+
+        <div class="grid-3">
+            <div class="panel"><div class="ph"><h3>Units Financed</h3></div><div id="list-units"></div></div>
+            <div class="panel"><div class="ph"><h3>Lead Sources</h3></div><div id="list-sources"></div></div>
+            <div class="panel"><div class="ph"><h3>Industry Breakdown</h3></div><div id="list-industry"></div></div>
+        </div>
+
+        <div class="panel">
+            <div class="ph"><h3>Sales Performance</h3></div>
+            <div style="overflow-x:auto">
+                <table id="table-sales">
+                    <thead><tr><th>Officer</th><th>Release Count</th><th>Total Released</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="ph"><h3>Recent Releases</h3></div>
+            <div style="overflow-x:auto">
+                <table id="main-table">
+                    <thead><tr><th>Account Name</th><th>Amount Released</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th><th>Date Fulfilled</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="cfg-modal">
+    <div style="background:#fff; padding:40px; border-radius:20px; width:400px; box-shadow:var(--shadow)">
+        <h3>API Configuration</h3>
+        <input type="text" id="api-key" placeholder="API Key" style="width:100%; padding:10px; margin:15px 0; border:1px solid var(--border); border-radius:8px">
+        <input type="password" id="api-token" placeholder="Token" style="width:100%; padding:10px; margin-bottom:20px; border:1px solid var(--border); border-radius:8px">
+        <button onclick="saveCfg()" style="width:100%; background:var(--brand); color:white; padding:12px; border:none; border-radius:8px; font-weight:700; cursor:pointer">Connect Trello</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const F_SOURCE   = "67b7e9d772a6efe6765df29d";
+const F_AMT_REL  = "67b7f6c3793ce13bd74c9da9";
+const F_AMT_APPR = "67b7f6b0f680bac983fad00a";
+const F_PN_VAL   = "67b7f6ec5cbc27f8b1781321";
+const F_ASSIGNED = "67b7ea6efccc1a975bf9cde7";
+const F_UNIT1    = "6944ea0a722b59a595bafb00";
+const F_UNIT11   = "697853855b999f5c38ffb2ca";
+const F_INDUSTRY = "6826b605619b34a8db6f8f0e";
+const F_DT_REC   = "67b7e9eff8ff295aa18bea58";
+const F_DT_APPR  = "67b7eb472d5f391ec0e72809";
+const F_DT_REL   = "67b7eb6c2c7c9f1b5092d3c1";
+const F_DT_FUL   = "67b7eb7cde3974f570394dcf";
+
+let currentTab = 'alltime';
+let viewYear = 2026, viewMonth = 5;
+let allCards = [], allProdCards = [], fieldOptions = {};
+let refreshSecs = 60;
+
+const $ = id => document.getElementById(id);
+const peso = n => n ? '₱' + Math.round(n).toLocaleString('en-PH') : '₱0';
+
+setInterval(() => {
+    refreshSecs--;
+    if(refreshSecs <= 0) { loadAll(); refreshSecs = 60; }
+    $('refresh-indicator').textContent = `Next sync in ${refreshSecs}s`;
+}, 1000);
+
+async function loadAll() {
+    const key = localStorage.getItem('tr_key'), token = localStorage.getItem('tr_token');
+    if(!key || !token) { showCfg(); return; }
+    try {
+        const boardInfo = await fetchTrello(`lists/67b7e78831bce247eba60d1b?fields=idBoard`);
+        const cfDefs = await fetchTrello(`boards/${boardInfo.idBoard}/customFields`);
+        fieldOptions = {};
+        cfDefs.forEach(d => {
+            if (d.type === 'list') {
+                fieldOptions[d.id] = {};
+                (d.options || []).forEach(o => fieldOptions[d.id][o.id] = o.value.text);
+            }
+        });
+        const raw = await fetchTrello(`lists/67b7e78831bce247eba60d1b/cards?customFieldItems=true&fields=name,dateLastActivity&limit=1000`);
+        allCards = raw.map(c => parseCard(c));
+        const lists = ['67b7e78831bce247eba60d1b', '67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611'];
+        allProdCards = [];
+        for(let lId of lists) {
+            const lc = await fetchTrello(`lists/${lId}/cards?customFieldItems=true&fields=name`);
+            allProdCards = allProdCards.concat(lc.map(c => parseCard(c)));
+        }
+        render();
+        refreshSecs = 60;
+    } catch(e) { console.error(e); }
+}
+
+function parseCard(c) {
+    const f = {};
+    (c.customFieldItems || []).forEach(i => {
+        if(i.value?.number) f[i.idCustomField] = parseFloat(i.value.number);
+        else if(i.value?.text) f[i.idCustomField] = i.value.text;
+        else if(i.value?.date) f[i.idCustomField] = i.value.date;
+        else if(i.idValue && fieldOptions[i.idCustomField]) f[i.idCustomField] = fieldOptions[i.idCustomField][i.idValue];
+    });
+    return { name: c.name, f, date: c.dateLastActivity };
+}
+
+function render() {
+    const targetYM = `${viewYear}-${String(viewMonth).padStart(2,'0')}`;
+    const relData = currentTab === 'alltime' ? allCards : allCards.filter(c => {
+        const d = new Date(c.f[F_DT_REL] || c.date);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM;
+    });
+    const prodData = currentTab === 'alltime' ? allProdCards : allProdCards.filter(c => {
+        const d = new Date(c.f[F_DT_APPR] || c.date);
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM;
+    });
+
+    const totalRelVol = relData.reduce((a,c) => a + (c.f[F_AMT_REL] || 0), 0);
+    const totalProdVol = prodData.reduce((a,c) => a + (c.f[F_AMT_APPR] || 0), 0);
+    const totalPnVol = relData.reduce((a,c) => a + (c.f[F_PN_VAL] || 0), 0);
+    const conv = totalProdVol > 0 ? (totalRelVol / totalProdVol) * 100 : 0;
+    
+    let velSum = 0, velCount = 0;
+    relData.forEach(c => {
+        if(c.f[F_DT_REC] && c.f[F_DT_FUL]) {
+            const diff = (new Date(c.f[F_DT_FUL]) - new Date(c.f[F_DT_REC])) / 86400000;
+            if(diff >= 0) { velSum += diff; velCount++; }
+        }
+    });
+
+    $('kpi-rel-count').textContent = relData.length.toLocaleString();
+    $('kpi-rel-vol').textContent = peso(totalRelVol);
+    $('kpi-conv').textContent = conv.toFixed(1) + '%';
+    $('kpi-vel').textContent = velCount ? (velSum/velCount).toFixed(1) + ' Days' : '---';
+    $('kpi-prod-vol').textContent = peso(totalProdVol);
+    $('kpi-avg-size').textContent = peso(relData.length ? totalRelVol / relData.length : 0);
+    $('kpi-prod-count').textContent = prodData.length.toLocaleString();
+    $('kpi-pn-vol').textContent = peso(totalPnVol); // Overall PN Value
+
+    renderUnitCombined(relData, totalRelVol);
+    renderGeneralList('list-sources', relData, F_SOURCE, totalRelVol);
+    renderGeneralList('list-industry', relData, F_INDUSTRY, totalRelVol);
+    renderSalesTable(relData, totalRelVol);
+    renderRecentTable(relData);
+    
+    if(currentTab === 'alltime') {
+        $('chart-panel-title').textContent = "Monthly Released Trend";
+        renderAllTimeChart();
+    } else {
+        $('chart-panel-title').textContent = "Weekly Release Breakdown";
+        renderWeeklyChart(relData);
+    }
+}
+
+function renderWeeklyChart(data) {
+    const ctx = $('mainChart').getContext('2d');
+    if(window.mainChartInst) window.mainChartInst.destroy();
+    const monthShort = new Date(viewYear, viewMonth - 1).toLocaleString('default', { month: 'short' });
+    const lastDay = new Date(viewYear, viewMonth, 0).getDate();
+    let weeks = [];
+    let currentDay = 1;
+    while (currentDay <= lastDay) {
+        let start = currentDay;
+        let dateObj = new Date(viewYear, viewMonth - 1, start);
+        let dayOfWeek = dateObj.getDay(); 
+        let end = Math.min(start + (6 - dayOfWeek), lastDay);
+        weeks.push({ label: `${monthShort} ${String(start).padStart(2,'0')} - ${String(end).padStart(2,'0')}`, start, end, amt: 0, count: 0 });
+        currentDay = end + 1;
+    }
+    data.forEach(c => {
+        const d = new Date(c.f[F_DT_REL] || c.date).getDate();
+        const amt = c.f[F_AMT_REL] || 0;
+        const week = weeks.find(w => d >= w.start && d <= w.end);
+        if(week) { week.amt += amt; week.count++; }
+    });
+    window.mainChartInst = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: weeks.map(w => w.label),
+            datasets: [{
+                label: 'Released Revenue',
+                data: weeks.map(w => w.amt),
+                counts: weeks.map(w => w.count),
+                borderColor: '#FF4500',
+                backgroundColor: 'rgba(255,69,0,0.1)',
+                fill: true, tension: 0.3, pointRadius: 5, pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return [`Released Revenue: ₱${Math.round(context.parsed.y).toLocaleString()}`, `Accounts Released: ${context.dataset.counts[context.dataIndex]}`]; } } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '₱' + (v/1e3).toFixed(0) + 'k' } } }
+        }
+    });
+}
+
+function renderAllTimeChart() {
+    const ctx = $('mainChart').getContext('2d');
+    if(window.mainChartInst) window.mainChartInst.destroy();
+    const monthly = {};
+    allCards.forEach(c => {
+        const d = new Date(c.f[F_DT_REL] || c.date);
+        if(d < new Date(2025, 5, 1)) return; 
+        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        if(!monthly[k]) monthly[k] = {amt: 0, count: 0};
+        monthly[k].amt += (c.f[F_AMT_REL] || 0);
+        monthly[k].count++;
+    });
+    const sortedKeys = Object.keys(monthly).sort();
+    window.mainChartInst = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: sortedKeys.map(k => {const [y, m] = k.split('-'); return new Date(y, m-1).toLocaleString('default', {month:'short', year:'numeric'});}),
+            datasets: [{ label: 'Released Revenue', data: sortedKeys.map(k => monthly[k].amt), counts: sortedKeys.map(k => monthly[k].count), borderColor: '#FF4500', backgroundColor: 'rgba(255,69,0,0.1)', fill: true, tension: 0.3, pointRadius: 4 }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return [`Released Revenue: ₱${Math.round(context.parsed.y).toLocaleString()}`, `Accounts Released: ${context.dataset.counts[context.dataIndex]}`]; } } } },
+            scales: { y: { beginAtZero: true, ticks: { callback: v => '₱' + (v/1e6).toFixed(1) + 'M' } } }
+        }
+    });
+}
+
+function renderUnitCombined(data, totalVolume) {
+    const map = {};
+    data.forEach(c => {
+        const amt = c.f[F_AMT_REL] || 0;
+        [c.f[F_UNIT1], c.f[F_UNIT11]].forEach(u => {
+            if(!u || u === 'Unknown' || u === '--' || u === 'null') return;
+            if(!map[u]) map[u] = {amt: 0, count: 0};
+            map[u].amt += amt; map[u].count++;
+        });
+    });
+    renderBarUi('list-units', map, totalVolume);
+}
+
+function renderGeneralList(id, data, fieldId, totalVolume) {
+    const map = {};
+    data.forEach(c => {
+        const k = c.f[fieldId];
+        if(!k || k === 'Unknown' || k === '--' || k === 'null' || k === 'Select...') return;
+        if(!map[k]) map[k] = {amt: 0, count: 0};
+        map[k].amt += (c.f[F_AMT_REL] || 0);
+        map[k].count++;
+    });
+    renderBarUi(id, map, totalVolume);
+}
+
+function renderBarUi(id, map, totalVolume) {
+    const sorted = Object.entries(map).sort((a,b) => b[1].amt - a[1].amt).slice(0, 10);
+    const max = sorted[0]?.[1].amt || 1;
+    let catAmt = 0, catCnt = 0;
+    Object.values(map).forEach(v => { catAmt += v.amt; catCnt += v.count; });
+    let html = sorted.map(([k, v]) => `
+        <div class="bar-item">
+            <div class="bar-
+            "><div class="bar-label">${k}</div><div class="bar-count">${v.count} Accts</div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(v.amt/max)*100}%"></div></div>
+            <div class="bar-bottom">
+                <div class="bar-amt">${peso(v.amt)}</div>
+                <div class="bar-pct">${totalVolume > 0 ? ((v.amt/totalVolume)*100).toFixed(1) : 0}%</div>
+            </div>
+        </div>
+    `).join('');
+    if(html) {
+        html += `<div class="bar-item bar-item-total">
+            <div class="bar-top"><div class="bar-label" style="font-weight:800">TOTAL</div><div class="bar-count" style="font-weight:800;color:var(--navy)">${catCnt} Accounts</div></div>
+            <div class="bar-bottom" style="margin-top:5px"><div class="bar-amt" style="font-weight:800">${peso(catAmt)}</div><div class="bar-pct" style="font-weight:800;color:var(--navy)">${totalVolume > 0 ? ((catAmt/totalVolume)*100).toFixed(1) : 0}%</div></div>
+        </div>`;
+    }
+    $(id).innerHTML = html || '<div style="padding:20px;text-align:center;font-size:12px">No data</div>';
+}
+
+function renderSalesTable(data, totalVolume) {
+    const map = {};
+    data.forEach(c => {
+        const off = c.f[F_ASSIGNED] || 'Unassigned';
+        if(!map[off]) map[off] = {cnt: 0, amt: 0, pn: 0};
+        map[off].cnt++; map[off].amt += (c.f[F_AMT_REL] || 0); map[off].pn += (c.f[F_PN_VAL] || 0);
+    });
+    let sumCnt = 0, sumAmt = 0, sumPn = 0;
+    const rows = Object.entries(map).sort((a,b) => b[1].cnt - a[1].cnt);
+    let html = rows.map(([off, v]) => {
+        sumCnt += v.cnt; sumAmt += v.amt; sumPn += v.pn;
+        return `<tr><td>${off}</td><td>${v.cnt}</td><td>${peso(v.amt)}</td><td>${peso(v.pn)}</td><td>${peso(v.amt/v.cnt)}</td><td style="font-weight:700;color:var(--brand)">${totalVolume > 0 ? ((v.amt/totalVolume)*100).toFixed(1) : 0}%</td></tr>`;
+    }).join('');
+    if(html) html += `<tr class="tr-total"><td>GRAND TOTAL</td><td>${sumCnt}</td><td>${peso(sumAmt)}</td><td>${peso(sumPn)}</td><td>${sumCnt > 0 ? peso(sumAmt/sumCnt) : '₱0'}</td><td>${totalVolume > 0 ? ((sumAmt/totalVolume)*100).toFixed(1) : 0}%</td></tr>`;
+    $('table-sales').querySelector('tbody').innerHTML = html;
+}
+
+function renderRecentTable(data) {
+    const sorted = [...data].sort((a,b) => new Date(b.f[F_DT_REL] || b.date) - new Date(a.f[F_DT_REL] || a.date)).slice(0, 15);
+    $('main-table').querySelector('tbody').innerHTML = sorted.map(c => `
+        <tr>
+            <td style="font-weight:700">${c.name}</td>
+            <td style="color:var(--brand);font-weight:700">${peso(c.f[F_AMT_REL])}</td>
+            <td>${peso(c.f[F_PN_VAL])}</td>
+            <td>${c.f[F_ASSIGNED] || '---'}</td>
+            <td><span style="background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:4px;font-weight:700;font-size:10px">${c.f[F_SOURCE] || 'Direct'}</span></td>
+            <td>${c.f[F_DT_APPR] ? new Date(c.f[F_DT_APPR]).toLocaleDateString() : '---'}</td>
+            <td>${c.f[F_DT_REL] ? new Date(c.f[F_DT_REL]).toLocaleDateString() : '---'}</td>
+            <td>${c.f[F_DT_FUL] ? new Date(c.f[F_DT_FUL]).toLocaleDateString() : '---'}</td>
+        </tr>
+    `).join('');
+}
+
+function exportData() {
+    const relData = currentTab === 'alltime' ? allCards : allCards.filter(c => {const d = new Date(c.f[F_DT_REL] || c.date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === `${viewYear}-${String(viewMonth).padStart(2,'0')}`;});
+    let csv = "Account Name,Amount Released,PN Value,Assigned To,Lead Source,Date Approved,Date Released,Date Fulfilled\n";
+    relData.forEach(c => { csv += `"${c.name}",${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0},"${c.f[F_ASSIGNED]||'---'}","${c.f[F_SOURCE]||'Direct'}",${c.f[F_DT_APPR]||'---'},${c.f[F_DT_REL]||'---'},${c.f[F_DT_FUL]||'---'}\n`;});
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    link.setAttribute("href", URL.createObjectURL(blob));
+    link.setAttribute("download", `GD_Report.csv`);
+    link.click();
+}
+
+function switchTab(t) { currentTab = t; $('view-title').textContent = t === 'alltime' ? 'Executive Overview' : 'Monthly Performance'; document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); $(`nav-${t}`).classList.add('active'); $('month-selector').style.display = t === 'monthly' ? 'flex' : 'none'; render(); }
+function changeMonth(d) { viewMonth += d; if(viewMonth > 12) { viewMonth = 1; viewYear++; } if(viewMonth < 1) { viewMonth = 12; viewYear--; } $('current-month-display').textContent = new Date(viewYear, viewMonth - 1).toLocaleString('default', {month:'long', year:'numeric'}); render(); }
+async function fetchTrello(path) { const k = localStorage.getItem('tr_key'), t = localStorage.getItem('tr_token'); const r = await fetch(`https://api.trello.com/1/${path}${path.includes('?')?'&':'?'}key=${k}&token=${t}`); return r.json(); }
+function showCfg() { $('cfg-modal').style.display = 'flex'; }
+function saveCfg() { localStorage.setItem('tr_key', $('api-key').value); localStorage.setItem('tr_token', $('api-token').value); $('cfg-modal').style.display = 'none'; loadAll(); }
+loadAll();
+</script>
+</body>
+</html>
