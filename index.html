@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoodDeal MCD — BI Executive Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --brand: #FF4500; --brand-dark: #E63E00; --navy: #0F172A;
@@ -14,64 +15,80 @@
   --radius: 12px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter', sans-serif; background:var(--bg); color:var(--text); min-height:100vh;}
+body{font-family:'Roboto', sans-serif; background:var(--bg); color:var(--text); min-height:100vh; font-size: 14px;}
 
 /* SIDEBAR */
 .sidebar{position:fixed; left:0; top:0; bottom:0; width:260px; background:var(--navy); z-index:100; box-shadow: 4px 0 20px rgba(0,0,0,0.1)}
 .sb-logo{padding:30px 24px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.05)}
 .sb-logo img{width:42px; height:42px; border-radius:10px}
-.sb-logo h2{color:#fff; font-size:16px; font-weight:800; letter-spacing:-0.03em}
+.sb-logo h2{color:#fff; font-size:18px; font-weight:800; letter-spacing:-0.03em}
 .sb-nav{padding:20px 15px; flex:1}
-.nav-item{display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px; color:rgba(255,255,255,0.6); text-decoration:none; margin-bottom:4px; font-size:14px; cursor:pointer; transition:0.2s; user-select:none;}
+
+.nav-item{display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:10px; color:rgba(255,255,255,0.6); text-decoration:none; margin-bottom:6px; font-size:15px; cursor:pointer; transition:0.2s; user-select:none;}
 .nav-item:hover, .nav-item.active{background:rgba(255,255,255,0.08); color:#fff}
-.nav-item.active{background:var(--brand); box-shadow: 0 4px 15px rgba(255,69,0,0.3)}
+.nav-item.active{background:var(--brand); box-shadow: 0 4px 15px rgba(255,69,0,0.3); font-weight: 700;}
 
 /* MAIN */
 .main{margin-left:260px; padding-bottom:60px}
-.topbar{background:rgba(255,255,255,0.9); backdrop-filter:blur(8px); height:75px; padding:0 35px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:90; border-bottom:1px solid var(--border)}
+.topbar{background:rgba(255,255,255,0.9); backdrop-filter:blur(8px); height:80px; padding:0 35px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:90; border-bottom:1px solid var(--border)}
+.topbar h1 { font-size: 22px; font-weight: 900; color: var(--navy); }
 
-/* KPI GRID */
-.kpi-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:20px; padding:25px 35px}
+/* KPI GRID 2x6 */
+.kpi-grid{display:grid; grid-template-columns:repeat(6, 1fr); gap:12px; padding:25px 35px}
 .kpi-card{background:var(--surface); padding:20px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); position:relative; overflow:hidden; user-select:none;}
-.kpi-card::after{content:''; position:absolute; left:0; top:0; height:100%; width:4px; background:var(--brand)}
-.kpi-lbl{font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px}
-.kpi-val{font-size:20px; font-weight:800; color:var(--navy); margin-bottom:4px; white-space: nowrap;}
-.kpi-sub{font-size:11px; color:var(--text-muted)}
+.kpi-card::after{content:''; position:absolute; left:0; top:0; height:100%; width:5px; background:var(--brand)}
+.kpi-lbl{font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px}
+.kpi-val{font-size:24px; font-weight:900; color:var(--navy); margin-bottom:4px; white-space: nowrap;}
+.kpi-sub{font-size:12px; color:var(--text-muted)}
 
-/* PANELS */
+/* CONTENT */
 .content{padding:0 35px}
-.panel{background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:25px; overflow:hidden}
-.ph{padding:18px 25px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(248,250,252,0.5); user-select:none;}
-.ph h3{font-size:14px; font-weight:700}
+.panel{background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:25px; overflow:hidden; display: flex; flex-direction: column;}
+.ph{padding:20px 25px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:rgba(248,250,252,0.5); user-select:none; flex-shrink: 0;}
+.ph h3{font-size:16px; font-weight:900; color: var(--navy)}
 
+.grid-2{display:grid; grid-template-columns: 1fr 1fr; gap:25px; margin-bottom:25px}
 .grid-3{display:grid; grid-template-columns: 1fr 1fr 1fr; gap:25px; margin-bottom:25px}
 
 /* TABLES */
 table{width:100%; border-collapse:collapse}
-th{text-align:left; padding:12px 20px; background:var(--bg); font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; white-space:nowrap}
-td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:12px}
-.tr-total td{background:var(--bg); font-weight:800; border-top:2px solid var(--border); color:var(--navy)}
+th{text-align:left; padding:12px 20px; background:var(--bg); font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; white-space:nowrap}
+td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:13px; color: var(--text)}
+.tr-total td{background:var(--bg); font-weight:900; border-top:2px solid var(--border); color:var(--navy); font-size: 14px;}
 
-/* BAR LISTS */
-.bar-item{padding:12px 20px; border-bottom:1px solid var(--bg); display:flex; flex-direction:column; gap:6px}
-.bar-item-total{background:rgba(241, 245, 249, 0.5); border-top: 1px solid var(--border); border-bottom: none;}
+/* BAR LISTS & SCROLLING */
+.bar-scroll-area { flex-grow: 1; overflow-y: auto; height: 380px; padding-bottom: 20px;}
+.bar-item{padding:18px 25px; border-bottom:1px solid var(--bg); display:flex; flex-direction:column; gap:8px;}
 .bar-top{display:flex; justify-content:space-between; align-items:center}
-.bar-label{font-size:11px; font-weight:700; color:var(--navy); text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:65%}
-.bar-count{font-size:10px; font-weight:700; color:var(--text-muted)}
+/* Custom Title Case Label Styling */
+.bar-label{font-size:12px; font-weight:900; color:var(--navy); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:70%}
+.bar-count{font-size:12px; font-weight:500; color:var(--text-muted)}
 .bar-track{width:100%; height:6px; background:var(--bg); border-radius:10px; overflow:hidden}
 .bar-fill{height:100%; background:var(--brand); border-radius:10px}
-.bar-bottom{display:flex; justify-content:space-between; align-items:center; font-size:11px; font-weight:700}
+.bar-bottom{display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700}
 .bar-amt{color:var(--brand)}
-.bar-pct{color:var(--text-muted)}
+.bar-pct{font-weight:900; color:var(--navy)} /* Updated to be bold */
 
-.btn-group{display:flex; gap:10px; align-items:center}
-.btn{background:var(--brand); color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition: 0.2s; user-select:none;}
-.btn:hover{background:var(--brand-dark)}
-.btn-outline{background:white; color:var(--navy); border:1px solid var(--border)}
+/* FIXED FOOTER (STEADY TOTALS) */
+.bar-item-total{ background:#E9F0F7; border-top: 2px solid var(--border); padding: 18px 25px; flex-shrink: 0; z-index: 5;}
+.total-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.total-data-row { display: flex; justify-content: space-between; align-items: center; }
+.total-lbl-main { font-size: 14px; font-weight: 900; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;}
+.total-amt-main { font-size: 14px; font-weight: 900; color: var(--brand); }
+.total-count-main { font-size: 13px; font-weight: 900; color: var(--navy); }
+.total-num { font-size: 13px; font-weight: 900; color: var(--navy); } /* Added strictly for footer percentages */
 
-.month-picker{display:flex; align-items:center; gap:10px; background:white; padding:5px 12px; border-radius:8px; border:1px solid var(--border); user-select:none;}
+/* BUTTONS */
+.btn-group{display:flex; gap:12px; align-items:center}
+.btn{ background: var(--brand); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.2s ease; user-select: none; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.btn:hover{background: var(--brand-dark); transform: translateY(-1px);}
+.btn-outline{ background: white; color: var(--navy); border: 1px solid var(--border); box-shadow: none; }
+.btn-toggle{ background: #E2E8F0; color: var(--text-muted); border: none; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; user-select: none; }
+.btn-toggle.active{ background: var(--brand); color: white; }
+
+.month-picker{display:flex; align-items:center; gap:10px; background:white; padding:8px 16px; border-radius:8px; border:1px solid var(--border); user-select:none;}
+#refresh-indicator{font-size:11px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:1px}
 #cfg-modal{display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:1000; align-items:center; justify-content:center}
-#refresh-indicator{font-size:10px; color:var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -84,7 +101,7 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:12px}
     <nav class="sb-nav">
         <div class="nav-item active" id="nav-alltime" onclick="switchTab('alltime')">Executive Overview</div>
         <div class="nav-item" id="nav-monthly" onclick="switchTab('monthly')">Monthly Performance</div>
-        <div style="margin-top:20px; padding:0 16px; font-size:10px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase">Settings</div>
+        <div style="margin-top:20px; padding:0 16px; font-size:11px; color:rgba(255,255,255,0.3); font-weight:700; text-transform:uppercase">Settings</div>
         <div class="nav-item" onclick="showCfg()">API Configuration</div>
     </nav>
 </aside>
@@ -95,53 +112,73 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:12px}
         <div class="btn-group">
             <div id="refresh-indicator">Syncing...</div>
             <div id="month-selector" class="month-picker" style="display:none">
-                <button onclick="changeMonth(-1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold">◀</button>
-                <span id="current-month-display" style="font-weight:700; font-size:13px; min-width:100px; text-align:center">May 2026</span>
-                <button onclick="changeMonth(1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold">▶</button>
+                <button onclick="changeMonth(-1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold; font-size: 18px;">◀</button>
+                <span id="current-month-display" style="font-weight:700; font-size:15px; min-width:130px; text-align:center">May 2026</span>
+                <button onclick="changeMonth(1)" style="border:none; background:none; cursor:pointer; color:var(--brand); font-weight:bold; font-size: 18px;">▶</button>
             </div>
-            <button class="btn btn-outline" onclick="exportData()">Export CSV</button>
+            <button class="btn btn-outline" onclick="exportFullData()">Export CSV</button>
             <button class="btn" onclick="loadAll()">Sync Data</button>
         </div>
     </header>
 
+    <!-- KPI GRID ORDERED EXACTLY TOP-TO-BOTTOM PER COLUMN -->
     <div id="kpi-grid" class="kpi-grid">
+        <!-- ROW 1 (TOP) -->
         <div class="kpi-card"><div class="kpi-lbl">Accounts Released</div><div class="kpi-val" id="kpi-rel-count">0</div><div class="kpi-sub">Total funded units</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Prod. Accounts</div><div class="kpi-val" id="kpi-prod-count">0</div><div class="kpi-sub">Active approved pipeline</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">Released Conversion</div><div class="kpi-val" id="kpi-conv">0%</div><div class="kpi-sub">Released vs Prod. Approved</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">Avg. Org. TAT</div><div class="kpi-val" id="kpi-vel">0 Days</div><div class="kpi-sub">Receive → Fulfilled speed</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Released Conversion</div><div class="kpi-val" id="kpi-conv">0%</div><div class="kpi-sub">Approved vs Released</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Avg. Org. (TAT)</div><div class="kpi-val" id="kpi-tat-fulf">0.0 d</div><div class="kpi-sub">Receive &rarr; Fulfilled, Business days</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Received to Approved (TAT)</div><div class="kpi-val" id="kpi-tat-appr">0.0 d</div><div class="kpi-sub">Business days</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Lead Conversion Rate</div><div class="kpi-val" id="kpi-lead-conv">0%</div><div class="kpi-sub" id="lead-conv-sub">Leads vs Released</div></div>
+
+        <!-- ROW 2 (BOTTOM) -->
         <div class="kpi-card"><div class="kpi-lbl">Amount Released</div><div class="kpi-val" id="kpi-rel-vol">₱0</div><div class="kpi-sub">Actual capital deployed</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Total Production</div><div class="kpi-val" id="kpi-prod-vol">₱0</div><div class="kpi-sub">Pipeline potential</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Avg. Release Size</div><div class="kpi-val" id="kpi-avg-size">₱0</div><div class="kpi-sub">Revenue per unit</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Total PN Value</div><div class="kpi-val" id="kpi-pn-vol">₱0</div><div class="kpi-sub">Total PN value</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Approved to Released (TAT)</div><div class="kpi-val" id="kpi-tat-appr-rel">0.0 d</div><div class="kpi-sub">Business days</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Lead Volume</div><div class="kpi-val" id="kpi-lead-count">0</div><div class="kpi-sub" id="lead-vol-sub">Leads received</div></div>
     </div>
 
     <div class="content">
-        <div class="panel">
-            <div class="ph"><h3 id="chart-panel-title">Monthly Released Trend</h3></div>
-            <div style="padding:20px"><canvas id="mainChart" style="width:100%; height:280px"></canvas></div>
+        <div class="panel" id="trend-panel">
+            <div class="ph">
+                <h3 id="chart-panel-title">Performance Trend</h3>
+                <div class="btn-group" id="chart-toggles">
+                    <button class="btn-toggle active" id="btn-rel" onclick="setChartMode('rel')">Released</button>
+                    <button class="btn-toggle" id="btn-prod" onclick="setChartMode('prod')">Production</button>
+                </div>
+            </div>
+            <div style="padding:20px; height: 350px;"><canvas id="mainChart"></canvas></div>
         </div>
 
         <div class="grid-3">
-            <div class="panel"><div class="ph"><h3>Units Financed</h3></div><div id="list-units"></div></div>
-            <div class="panel"><div class="ph"><h3>Lead Sources</h3></div><div id="list-sources"></div></div>
-            <div class="panel"><div class="ph"><h3>Industry Breakdown</h3></div><div id="list-industry"></div></div>
+            <div class="panel"><div class="ph"><h3>Units Financed</h3></div><div id="list-units" class="bar-scroll-area"></div><div id="total-units" class="bar-item-total"></div></div>
+            <div class="panel"><div class="ph"><h3>Lead Sources</h3></div><div id="list-sources" class="bar-scroll-area"></div><div id="total-sources" class="bar-item-total"></div></div>
+            <div class="panel"><div class="ph"><h3>Region Profiling</h3></div><div id="list-regions" class="bar-scroll-area"></div><div id="total-regions" class="bar-item-total"></div></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel"><div class="ph"><h3>Dealer Performance</h3></div><div id="list-dealers" class="bar-scroll-area"></div><div id="total-dealers" class="bar-item-total"></div></div>
+            <div class="panel"><div class="ph"><h3>Industry Breakdown</h3></div><div id="list-industry" class="bar-scroll-area"></div><div id="total-industry" class="bar-item-total"></div></div>
         </div>
 
         <div class="panel">
             <div class="ph"><h3>Sales Performance</h3></div>
-            <div style="overflow-x:auto">
+            <div style="overflow-x:auto;">
                 <table id="table-sales">
-                    <thead><tr><th>Officer</th><th>Release Count</th><th>Total Released</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr></thead>
-                    <tbody></tbody>
+                    <thead><tr><th>Assigned To</th><th>Released Accounts</th><th>Total Released</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr></thead>
+                    <tbody id="table-sales-body"></tbody>
                 </table>
             </div>
+            <div id="total-sales" class="bar-item-total"></div>
         </div>
 
-        <div class="panel">
-            <div class="ph"><h3>Recent Releases</h3></div>
+        <div class="panel" id="recent-panel" style="display:none">
+            <div class="ph"><h3>Recent High-Value Releases</h3></div>
             <div style="overflow-x:auto">
                 <table id="main-table">
-                    <thead><tr><th>Account Name</th><th>Amount Released</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th><th>Date Fulfilled</th></tr></thead>
+                    <thead><tr><th>Account Name</th><th>Amount</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th><th>Date Fulfilled</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -160,6 +197,7 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:12px}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// --- CONSTANTS ---
 const F_SOURCE   = "67b7e9d772a6efe6765df29d";
 const F_AMT_REL  = "67b7f6c3793ce13bd74c9da9";
 const F_AMT_APPR = "67b7f6b0f680bac983fad00a";
@@ -167,24 +205,100 @@ const F_PN_VAL   = "67b7f6ec5cbc27f8b1781321";
 const F_ASSIGNED = "67b7ea6efccc1a975bf9cde7";
 const F_UNIT1    = "6944ea0a722b59a595bafb00";
 const F_UNIT11   = "697853855b999f5c38ffb2ca";
+const F_DEALER   = "699d6d4c103a296b18b0c053";
+const F_RESIDENCE= "67d3875f93411d0363e766fd";
 const F_INDUSTRY = "6826b605619b34a8db6f8f0e";
 const F_DT_REC   = "67b7e9eff8ff295aa18bea58";
 const F_DT_APPR  = "67b7eb472d5f391ec0e72809";
 const F_DT_REL   = "67b7eb6c2c7c9f1b5092d3c1";
 const F_DT_FUL   = "67b7eb7cde3974f570394dcf";
+const F_DT_COMP  = "6944ea0a722b59a595bafb53";
+const F_REFERROR = "67b7eae32662ff71c22a9b7b";
 
-let currentTab = 'alltime';
-let viewYear = 2026, viewMonth = 5;
-let allCards = [], allProdCards = [], fieldOptions = {};
-let refreshSecs = 60;
+// Universal Infinite Generic PH Holidays Generator
+function getPHHolidays(year) {
+    // Standard Fixed Holidays in the Philippines
+    const fixed =[
+        "01-01", // New Year
+        "02-25", // EDSA Revolution
+        "04-09", // Araw ng Kagitingan
+        "05-01", // Labor Day
+        "06-12", // Independence Day
+        "08-21", // Ninoy Aquino Day
+        "11-01", // All Saints' Day
+        "11-02", // All Souls' Day (usually declared special non-working)
+        "11-30", // Bonifacio Day
+        "12-08", // Feast of the Immaculate Conception
+        "12-24", // Christmas Eve
+        "12-25", // Christmas Day
+        "12-30", // Rizal Day
+        "12-31"  // New Year's Eve
+    ];
+
+    let holidays = fixed.map(d => `${year}-${d}`);
+    const formatDate = (dateObj) => dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
+
+    // 1. Dynamic Holy Week Calculation (Computus Algorithm for Easter)
+    let a = year % 19, b = Math.floor(year / 100), c = year % 100, d = Math.floor(b / 4), e = b % 4;
+    let f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30;
+    let i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7;
+    let m = Math.floor((a + 11 * h + 22 * l) / 451);
+    let easterMonth = Math.floor((h + l - 7 * m + 114) / 31); // 3=Mar, 4=Apr
+    let easterDay = ((h + l - 7 * m + 114) % 31) + 1;
+    
+    let easterDate = new Date(year, easterMonth - 1, easterDay);
+    let maundyThursday = new Date(easterDate); maundyThursday.setDate(easterDate.getDate() - 3);
+    let goodFriday = new Date(easterDate); goodFriday.setDate(easterDate.getDate() - 2);
+    let blackSaturday = new Date(easterDate); blackSaturday.setDate(easterDate.getDate() - 1);
+    
+    holidays.push(formatDate(maundyThursday), formatDate(goodFriday), formatDate(blackSaturday));
+
+    // 2. Dynamic National Heroes Day Calculation (Last Monday of August)
+    let lastDayOfAug = new Date(year, 7, 31); // Month 7 is August
+    let dayOfWeek = lastDayOfAug.getDay();
+    let offset = dayOfWeek === 1 ? 0 : (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+    let heroesDay = new Date(year, 7, 31 - offset);
+    
+    holidays.push(formatDate(heroesDay));
+
+    return holidays;
+}
+
+function calculateBusinessDays(start, end) {
+    if(!start || !end) return null;
+    let d1 = new Date(start), d2 = new Date(end);
+    if(isNaN(d1) || isNaN(d2) || d1 > d2) return 0;
+    
+    let count = 0; 
+    let cur = new Date(d1);
+    
+    while (cur <= d2) {
+        // 6-Day Work Week: Only skip Sundays (0)
+        const isWeekend = cur.getDay() === 0; 
+        
+        // Format strictly to local YYYY-MM-DD to avoid standard UTC Timezone shift bugs
+        const localDateString = cur.getFullYear() + '-' + 
+                                String(cur.getMonth() + 1).padStart(2, '0') + '-' + 
+                                String(cur.getDate()).padStart(2, '0');
+        
+        const isHoliday = getPHHolidays(cur.getFullYear()).includes(localDateString);
+
+        if (!isWeekend && !isHoliday) { count++; }
+        
+        cur.setDate(cur.getDate() + 1);
+    }
+    return count;
+}
+
+let currentTab = 'alltime', viewYear = 2026, viewMonth = 5, chartMode = 'rel';
+let allCards =[], allProdCards =[], boardLeads =[], fieldOptions = {}, refreshSecs = 60;
 
 const $ = id => document.getElementById(id);
 const peso = n => n ? '₱' + Math.round(n).toLocaleString('en-PH') : '₱0';
 
 setInterval(() => {
-    refreshSecs--;
-    if(refreshSecs <= 0) { loadAll(); refreshSecs = 60; }
-    $('refresh-indicator').textContent = `Next sync in ${refreshSecs}s`;
+    refreshSecs--; if(refreshSecs <= 0) { loadAll(); refreshSecs = 60; }
+    $('refresh-indicator').textContent = `Sync in ${refreshSecs}s`;
 }, 1000);
 
 async function loadAll() {
@@ -194,252 +308,344 @@ async function loadAll() {
         const boardInfo = await fetchTrello(`lists/67b7e78831bce247eba60d1b?fields=idBoard`);
         const cfDefs = await fetchTrello(`boards/${boardInfo.idBoard}/customFields`);
         fieldOptions = {};
-        cfDefs.forEach(d => {
-            if (d.type === 'list') {
-                fieldOptions[d.id] = {};
-                (d.options || []).forEach(o => fieldOptions[d.id][o.id] = o.value.text);
-            }
-        });
+        cfDefs.forEach(d => { if (d.type === 'list') { fieldOptions[d.id] = {}; (d.options ||[]).forEach(o => fieldOptions[d.id][o.id] = o.value.text); } });
         const raw = await fetchTrello(`lists/67b7e78831bce247eba60d1b/cards?customFieldItems=true&fields=name,dateLastActivity&limit=1000`);
         allCards = raw.map(c => parseCard(c));
-        const lists = ['67b7e78831bce247eba60d1b', '67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611'];
-        allProdCards = [];
-        for(let lId of lists) {
+        const prodLists = ['67b7e78831bce247eba60d1b', '67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611'];
+        allProdCards =[];
+        for(let lId of prodLists) {
             const lc = await fetchTrello(`lists/${lId}/cards?customFieldItems=true&fields=name`);
             allProdCards = allProdCards.concat(lc.map(c => parseCard(c)));
         }
+        boardLeads = await fetchTrello(`boards/${boardInfo.idBoard}/cards?fields=id`);
         render();
-        refreshSecs = 60;
     } catch(e) { console.error(e); }
 }
 
 function parseCard(c) {
     const f = {};
-    (c.customFieldItems || []).forEach(i => {
+    (c.customFieldItems ||[]).forEach(i => {
         if(i.value?.number) f[i.idCustomField] = parseFloat(i.value.number);
         else if(i.value?.text) f[i.idCustomField] = i.value.text;
         else if(i.value?.date) f[i.idCustomField] = i.value.date;
         else if(i.idValue && fieldOptions[i.idCustomField]) f[i.idCustomField] = fieldOptions[i.idCustomField][i.idValue];
     });
-    return { name: c.name, f, date: c.dateLastActivity };
+    f.created = new Date(parseInt(c.id.substring(0,8), 16) * 1000);
+    return { id: c.id, name: c.name, f, date: c.dateLastActivity };
+}
+
+function classifyRegion(addr) {
+    if(!addr) return null;
+    const a = addr.toLowerCase();
+    const regionKeywords = {
+        'NCR (METRO MANILA)':['manila', 'quezon city', 'makati', 'pasig', 'taguig', 'pasay', 'mandaluyong', 'marikina', 'las piñas', 'parañaque', 'valenzuela', 'malabon', 'navotas', 'caloocan', 'sanjuan', 'pateros', 'ncr', 'metromanila', 'muntinlupa'],
+        'REGION IV-A (CALABARZON)': ['cavite', 'laguna', 'batangas', 'rizal', 'quezon province', 'antipolo', 'lucena', 'dasmarinas', 'bacoor', 'calamba', 'binan', 'sta. rosa'],
+        'REGION III (C. LUZON)': ['bulacan', 'pampanga', 'tarlac', 'zambales', 'bataan', 'nueva ecija', 'aurora'],
+        'REGION VII (C. VISAYAS)': ['cebu', 'negros oriental', 'bohol', 'siquijor'],
+        'REGION XI (DAVAO)': ['davao'],
+        'CAR (CORDILLERA)': ['benguet', 'baguio', 'abra', 'apayo', 'ifugao', 'kalinga', 'mountain province']
+    };
+    for(let reg in regionKeywords) { if(regionKeywords[reg].some(k => a.includes(k))) return reg; }
+    return "OTHERS / UNSPECIFIED";
+}
+
+
+// Convert string to Title Case while keeping prepositions lowercase and fixing Roman Numerals
+function formatLabelCase(str) {
+    if (!str) return '';
+    
+    // 1. Capitalize the first letter of every word
+    let titleCased = str.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    
+    // 2. Force minor words (prepositions/conjunctions) to lowercase
+    const minorWords = /\b(And|Or|But|Nor|As|At|By|For|In|Of|On|To|With|A|An|The)\b/g;
+    titleCased = titleCased.replace(minorWords, function(match, p1, offset) {
+        if (offset === 0) return match; 
+        return match.toLowerCase();
+    });
+
+    // 3. FORCE ALL CAPS for Roman Numerals and general Acronyms (III, IV-A, VII, NCR, etc.)
+    const romanAndAcronyms = /\b(Ii|Iii|Iv|Iv-a|Vi|Vii|Viii|Ix|Xi|Xii|Ncr)\b/ig;
+    titleCased = titleCased.replace(romanAndAcronyms, function(match) {
+        return match.toUpperCase();
+    });
+
+    // 4. Specifically fix "CAR" for Cordillera (Done manually so it doesn't accidentally capitalize the vehicle "Car")
+    titleCased = titleCased.replace(/\bCar \(Cordillera\)/ig, "CAR (Cordillera)");
+
+    return titleCased;
 }
 
 function render() {
     const targetYM = `${viewYear}-${String(viewMonth).padStart(2,'0')}`;
-    const relData = currentTab === 'alltime' ? allCards : allCards.filter(c => {
-        const d = new Date(c.f[F_DT_REL] || c.date);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM;
-    });
-    const prodData = currentTab === 'alltime' ? allProdCards : allProdCards.filter(c => {
-        const d = new Date(c.f[F_DT_APPR] || c.date);
-        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM;
-    });
+    
+    const relData = currentTab === 'alltime' 
+        ? allCards.filter(c => c.f[F_DT_REL] && !isNaN(new Date(c.f[F_DT_REL]))) 
+        : allCards.filter(c => { 
+            if(!c.f[F_DT_REL]) return false;
+            const d = new Date(c.f[F_DT_REL]);
+            if(isNaN(d)) return false;
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; 
+          });
+
+    const prodData = currentTab === 'alltime' ? allProdCards : allProdCards.filter(c => { const d = new Date(c.f[F_DT_APPR] || c.f[F_DT_REL] || c.f.created); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; });
+    let leadCount = currentTab === 'alltime' ? boardLeads.length : boardLeads.filter(c => { const d = new Date(parseInt(c.id.substring(0,8), 16) * 1000); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; }).length;
 
     const totalRelVol = relData.reduce((a,c) => a + (c.f[F_AMT_REL] || 0), 0);
     const totalProdVol = prodData.reduce((a,c) => a + (c.f[F_AMT_APPR] || 0), 0);
     const totalPnVol = relData.reduce((a,c) => a + (c.f[F_PN_VAL] || 0), 0);
-    const conv = totalProdVol > 0 ? (totalRelVol / totalProdVol) * 100 : 0;
     
-    let velSum = 0, velCount = 0;
+    $('kpi-rel-count').textContent = relData.length.toLocaleString();
+    $('kpi-prod-count').textContent = prodData.length.toLocaleString();
+    $('kpi-conv').textContent = (prodData.length > 0 ? (relData.length/prodData.length)*100 : 0).toFixed(1) + '%';
+    $('kpi-lead-conv').textContent = (leadCount > 0 ? (relData.length/leadCount)*100 : 0).toFixed(1) + '%';
+    $('kpi-rel-vol').textContent = peso(totalRelVol);
+    $('kpi-prod-vol').textContent = peso(totalProdVol);
+    $('kpi-avg-size').textContent = peso(relData.length ? totalRelVol/relData.length : 0);
+    $('kpi-pn-vol').textContent = peso(totalPnVol);
+    $('kpi-lead-count').textContent = leadCount.toLocaleString();
+
+    let tat = { recAppr: {s:0, c:0}, apprRel: {s:0, c:0}, recFulf: {s:0, c:0} };
     relData.forEach(c => {
-        if(c.f[F_DT_REC] && c.f[F_DT_FUL]) {
-            const diff = (new Date(c.f[F_DT_FUL]) - new Date(c.f[F_DT_REC])) / 86400000;
-            if(diff >= 0) { velSum += diff; velCount++; }
+        let r = c.f[F_DT_REC];
+        let a = c.f[F_DT_APPR];
+        let rel = c.f[F_DT_REL];
+        let f = c.f[F_DT_FUL];
+
+        // Received to Approved
+        if(r && a) {
+            let val = calculateBusinessDays(r, a); 
+            if(val !== null){ tat.recAppr.s += val; tat.recAppr.c++; }
+        }
+        // Approved to Released
+        if(a && rel) {
+            let val = calculateBusinessDays(a, rel); 
+            if(val !== null){ tat.apprRel.s += val; tat.apprRel.c++; }
+        }
+        // Received to Fulfilled
+        if(r && f) {
+            let val = calculateBusinessDays(r, f); 
+            if(val !== null){ tat.recFulf.s += val; tat.recFulf.c++; }
         }
     });
 
-    $('kpi-rel-count').textContent = relData.length.toLocaleString();
-    $('kpi-rel-vol').textContent = peso(totalRelVol);
-    $('kpi-conv').textContent = conv.toFixed(1) + '%';
-    $('kpi-vel').textContent = velCount ? (velSum/velCount).toFixed(1) + ' Days' : '---';
-    $('kpi-prod-vol').textContent = peso(totalProdVol);
-    $('kpi-avg-size').textContent = peso(relData.length ? totalRelVol / relData.length : 0);
-    $('kpi-prod-count').textContent = prodData.length.toLocaleString();
-    $('kpi-pn-vol').textContent = peso(totalPnVol); // Overall PN Value
+    $('kpi-tat-appr').textContent = tat.recAppr.c ? (tat.recAppr.s / tat.recAppr.c).toFixed(1) + ' d' : '---';
+    $('kpi-tat-appr-rel').textContent = tat.apprRel.c ? (tat.apprRel.s / tat.apprRel.c).toFixed(1) + ' d' : '---';
+    $('kpi-tat-fulf').textContent = tat.recFulf.c ? (tat.recFulf.s / tat.recFulf.c).toFixed(1) + ' d' : '---';
 
-    renderUnitCombined(relData, totalRelVol);
-    renderGeneralList('list-sources', relData, F_SOURCE, totalRelVol);
-    renderGeneralList('list-industry', relData, F_INDUSTRY, totalRelVol);
-    renderSalesTable(relData, totalRelVol);
-    renderRecentTable(relData);
+    const baseline = relData.length;
+    renderBarUi('list-units', 'total-units', mapCombinedUnits(relData), baseline);
+    renderBarUi('list-sources', 'total-sources', mapGeneral(relData, F_SOURCE), baseline);
+    renderBarUi('list-regions', 'total-regions', mapRegions(relData), baseline);
+    renderBarUi('list-dealers', 'total-dealers', mapGeneral(relData, F_DEALER), baseline);
+    renderBarUi('list-industry', 'total-industry', mapGeneral(relData, F_INDUSTRY), baseline);
     
+    renderSales(relData, baseline);
+    renderRecent(relData);
+
+    $('trend-panel').style.display = 'flex';
     if(currentTab === 'alltime') {
-        $('chart-panel-title').textContent = "Monthly Released Trend";
-        renderAllTimeChart();
+        $('chart-panel-title').textContent = 'Performance Trend';
+        $('chart-toggles').style.display = 'flex';
+        renderTrend(); 
     } else {
-        $('chart-panel-title').textContent = "Weekly Release Breakdown";
-        renderWeeklyChart(relData);
+        $('chart-panel-title').textContent = 'Weekly Release Breakdown';
+        $('chart-toggles').style.display = 'none';
+        renderWeeklyChart(relData); 
     }
+}
+
+function mapCombinedUnits(data) {
+    const m = {};
+    data.forEach(c => {
+        [c.f[F_UNIT1], c.f[F_UNIT11]].forEach(u => {
+            if(!u || u === 'Unknown' || u === '--') return;
+            if(!m[u]) m[u] = {a:0, c:0}; m[u].a += (c.f[F_AMT_REL]||0); m[u].c++;
+        });
+    });
+    return m;
+}
+
+function mapGeneral(data, fid) {
+    const m = {};
+    data.forEach(c => {
+        const k = c.f[fid]; if(!k || k==='Unknown' || k==='Select...' || k==='null') return;
+        if(!m[k]) m[k] = {a:0, c:0}; m[k].a += (c.f[F_AMT_REL]||0); m[k].c++;
+    });
+    return m;
+}
+
+function mapRegions(data) {
+    const m = {};
+    data.forEach(c => {
+        const r = classifyRegion(c.f[F_RESIDENCE]); if(!r) return;
+        if(!m[r]) m[r] = {a:0, c:0}; m[r].a += (c.f[F_AMT_REL]||0); m[r].c++;
+    });
+    return m;
+}
+
+function renderBarUi(lid, tid, map, base) {
+    let sorted = Object.entries(map).sort((a,b) => b[1].c - a[1].c);
+    let sumA = 0, sumC = 0; Object.values(map).forEach(v => { sumA += v.a; sumC += v.c; });
+    $(lid).innerHTML = sorted.map(([k,v]) => `
+        <div class="bar-item">
+            <div class="bar-top"><div class="bar-label" title="${k}">${formatLabelCase(k)}</div><div class="bar-count">${v.c} Accounts</div></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(v.c/(sorted[0][1].c||1))*100}%"></div></div>
+            <div class="bar-bottom"><div class="bar-amt">${peso(v.a)}</div><div class="bar-pct">${base ? ((v.c/base)*100).toFixed(1) : 0}%</div></div>
+        </div>`).join('');
+    $(tid).innerHTML = `<div class="total-header-row"><div class="total-lbl-main">TOTAL DATA POINTS</div><div class="total-count-main">${sumC} Accounts</div></div><div class="total-data-row"><div class="total-amt-main">${peso(sumA)}</div><div class="total-num">${base ? ((sumC/base)*100).toFixed(1) : 0}%</div></div>`;
+}
+
+function renderSales(data, base) {
+    const m = {};
+    data.forEach(c => {
+        const o = c.f[F_ASSIGNED]; if(!o || o==='Unassigned') return;
+        if(!m[o]) m[o] = {c:0, a:0, p:0}; m[o].c++; m[o].a += (c.f[F_AMT_REL]||0); m[o].p += (c.f[F_PN_VAL]||0);
+    });
+    const s = Object.entries(m).sort((a,b) => b[1].c - a[1].c);
+    let sa=0, sc=0, sp=0;
+    $('table-sales-body').innerHTML = s.map(([o,v]) => {
+        sa += v.a; sc += v.c; sp += v.p;
+        return `<tr><td>${o}</td><td>${v.c}</td><td>${peso(v.a)}</td><td>${peso(v.p)}</td><td>${v.c?peso(v.a/v.c):0}</td><td style="font-weight:900;color:var(--brand)">${base?((v.c/base)*100).toFixed(1):0}%</td></tr>`;
+    }).join('');
+    const footer = `<div class="total-header-row"><div class="total-lbl-main">GRAND TOTAL</div><div class="total-count-main">${sc} Accounts</div></div><div class="total-data-row"><div class="total-amt-main">${peso(sa)}</div><div class="total-num">${base ? ((sc/base)*100).toFixed(1) : 0}%</div></div>`;
+    $('total-sales').innerHTML = footer;
+}
+
+function renderRecent(data) {
+    const s = [...data].sort((a,b) => new Date(b.f[F_DT_REL]||b.date) - new Date(a.f[F_DT_REL]||a.date)).slice(0, 15);
+    $('main-table').querySelector('tbody').innerHTML = s.map(c => `<tr><td>${c.name}</td><td>${peso(c.f[F_AMT_REL])}</td><td>${peso(c.f[F_PN_VAL])}</td><td>${c.f[F_ASSIGNED]||'---'}</td><td>${c.f[F_SOURCE]||'---'}</td><td>${c.f[F_DT_APPR]||'---'}</td><td>${c.f[F_DT_REL]||'---'}</td><td>${c.f[F_DT_FUL]||'---'}</td></tr>`).join('');
+}
+
+function setChartMode(m) { chartMode = m; document.querySelectorAll('.btn-toggle').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); renderTrend(); }
+
+function renderTrend() {
+    const ctx = $('mainChart').getContext('2d'); if(window.mInst) window.mInst.destroy();
+    const m = {};
+    const ds = chartMode === 'rel' 
+        ? allCards.filter(c => c.f[F_DT_REL] && !isNaN(new Date(c.f[F_DT_REL]))) 
+        : allProdCards;
+
+    ds.forEach(c => {
+        const d = new Date(c.f[chartMode==='rel'?F_DT_REL:F_DT_APPR] || c.f.created); if(isNaN(d) || d < new Date(2025, 5, 1)) return;
+        const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+        if(!m[k]) m[k]={a:0, c:0}; m[k].a += (c.f[chartMode==='rel'?F_AMT_REL:F_AMT_APPR]||0); m[k].c++;
+    });
+    const sk = Object.keys(m).sort();
+    window.mInst = new Chart(ctx, {
+        type:'line', data: {
+            labels: sk.map(k=>new Date(k+'-01').toLocaleString('default',{month:'short',year:'2-digit'})),
+            datasets:[{label: chartMode==='rel'?'Released Volume':'Production Volume', data: sk.map(k=>m[k].a), counts: sk.map(k=>m[k].c), borderColor:'#FF4500', backgroundColor:'rgba(255,69,0,0.1)', fill:true, tension:0.4, pointBackgroundColor:'#fff', pointBorderColor:'#FF4500', pointBorderWidth:2, pointRadius:4}]
+        },
+        options:{
+            responsive:true, 
+            maintainAspectRatio:false, 
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + (value >= 1000 ? (value / 1000) + 'k' : value);
+                        }
+                    }
+                }
+            },
+            plugins:{
+                tooltip:{
+                    callbacks:{
+                        label:ctx=>[`Volume: ₱${ctx.parsed.y.toLocaleString()}`,`Accounts: ${ctx.dataset.counts[ctx.dataIndex]}`]
+                    }
+                }
+            }
+        }
+    });
 }
 
 function renderWeeklyChart(data) {
-    const ctx = $('mainChart').getContext('2d');
-    if(window.mainChartInst) window.mainChartInst.destroy();
-    const monthShort = new Date(viewYear, viewMonth - 1).toLocaleString('default', { month: 'short' });
-    const lastDay = new Date(viewYear, viewMonth, 0).getDate();
-    let weeks = [];
-    let currentDay = 1;
-    while (currentDay <= lastDay) {
-        let start = currentDay;
-        let dateObj = new Date(viewYear, viewMonth - 1, start);
-        let dayOfWeek = dateObj.getDay(); 
-        let end = Math.min(start + (6 - dayOfWeek), lastDay);
-        weeks.push({ label: `${monthShort} ${String(start).padStart(2,'0')} - ${String(end).padStart(2,'0')}`, start, end, amt: 0, count: 0 });
-        currentDay = end + 1;
+    const ctx = $('mainChart').getContext('2d'); if(window.mInst) window.mInst.destroy();
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = monthNames[viewMonth - 1];
+
+    const w =[];
+    const lastDate = new Date(viewYear, viewMonth, 0).getDate();
+    let currentStart = 1;
+
+    while (currentStart <= lastDate) {
+        const dateObj = new Date(viewYear, viewMonth - 1, currentStart);
+        const dayOfWeek = dateObj.getDay(); 
+        const daysToSaturday = 6 - dayOfWeek;
+        let currentEnd = currentStart + daysToSaturday;
+        if (currentEnd > lastDate) currentEnd = lastDate;
+        
+        w.push({ s: currentStart, e: currentEnd, a: 0, c: 0 });
+        currentStart = currentEnd + 1;
     }
+
     data.forEach(c => {
-        const d = new Date(c.f[F_DT_REL] || c.date).getDate();
-        const amt = c.f[F_AMT_REL] || 0;
-        const week = weeks.find(w => d >= w.start && d <= w.end);
-        if(week) { week.amt += amt; week.count++; }
+        if(!c.f[F_DT_REL]) return;
+        const d = new Date(c.f[F_DT_REL]).getDate();
+        const wk = w.find(x => d >= x.s && d <= x.e); 
+        if(wk){ wk.a += (c.f[F_AMT_REL]||0); wk.c++; }
     });
-    window.mainChartInst = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: weeks.map(w => w.label),
-            datasets: [{
-                label: 'Released Revenue',
-                data: weeks.map(w => w.amt),
-                counts: weeks.map(w => w.count),
-                borderColor: '#FF4500',
-                backgroundColor: 'rgba(255,69,0,0.1)',
-                fill: true, tension: 0.3, pointRadius: 5, pointHoverRadius: 7
+
+    window.mInst = new Chart(ctx, {
+        type:'line', 
+        data:{
+            labels: w.map(x => `${monthName} ${String(x.s).padStart(2,'0')} - ${String(x.e).padStart(2,'0')}`), 
+            datasets:[{
+                label:'Released Volume', 
+                data: w.map(x=>x.a), 
+                counts: w.map(x=>x.c),
+                borderColor:'#FF4500', 
+                backgroundColor:'rgba(255,69,0,0.1)', 
+                fill:true, 
+                tension:0.4,
+                pointBackgroundColor:'#fff', 
+                pointBorderColor:'#FF4500', 
+                pointBorderWidth:2, 
+                pointRadius:4
             }]
         },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return [`Released Revenue: ₱${Math.round(context.parsed.y).toLocaleString()}`, `Accounts Released: ${context.dataset.counts[context.dataIndex]}`]; } } } },
-            scales: { y: { beginAtZero: true, ticks: { callback: v => '₱' + (v/1e3).toFixed(0) + 'k' } } }
+        options:{
+            responsive:true, 
+            maintainAspectRatio:false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: ctx => [
+                            `Volume: ₱${ctx.parsed.y.toLocaleString()}`,
+                            `Accounts: ${ctx.dataset.counts[ctx.dataIndex]}`
+                        ]
+                    }
+                }
+            }
         }
     });
 }
 
-function renderAllTimeChart() {
-    const ctx = $('mainChart').getContext('2d');
-    if(window.mainChartInst) window.mainChartInst.destroy();
-    const monthly = {};
-    allCards.forEach(c => {
-        const d = new Date(c.f[F_DT_REL] || c.date);
-        if(d < new Date(2025, 5, 1)) return; 
-        const k = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        if(!monthly[k]) monthly[k] = {amt: 0, count: 0};
-        monthly[k].amt += (c.f[F_AMT_REL] || 0);
-        monthly[k].count++;
-    });
-    const sortedKeys = Object.keys(monthly).sort();
-    window.mainChartInst = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: sortedKeys.map(k => {const [y, m] = k.split('-'); return new Date(y, m-1).toLocaleString('default', {month:'short', year:'numeric'});}),
-            datasets: [{ label: 'Released Revenue', data: sortedKeys.map(k => monthly[k].amt), counts: sortedKeys.map(k => monthly[k].count), borderColor: '#FF4500', backgroundColor: 'rgba(255,69,0,0.1)', fill: true, tension: 0.3, pointRadius: 4 }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(context) { return [`Released Revenue: ₱${Math.round(context.parsed.y).toLocaleString()}`, `Accounts Released: ${context.dataset.counts[context.dataIndex]}`]; } } } },
-            scales: { y: { beginAtZero: true, ticks: { callback: v => '₱' + (v/1e6).toFixed(1) + 'M' } } }
-        }
-    });
-}
-
-function renderUnitCombined(data, totalVolume) {
-    const map = {};
-    data.forEach(c => {
-        const amt = c.f[F_AMT_REL] || 0;
-        [c.f[F_UNIT1], c.f[F_UNIT11]].forEach(u => {
-            if(!u || u === 'Unknown' || u === '--' || u === 'null') return;
-            if(!map[u]) map[u] = {amt: 0, count: 0};
-            map[u].amt += amt; map[u].count++;
-        });
-    });
-    renderBarUi('list-units', map, totalVolume);
-}
-
-function renderGeneralList(id, data, fieldId, totalVolume) {
-    const map = {};
-    data.forEach(c => {
-        const k = c.f[fieldId];
-        if(!k || k === 'Unknown' || k === '--' || k === 'null' || k === 'Select...') return;
-        if(!map[k]) map[k] = {amt: 0, count: 0};
-        map[k].amt += (c.f[F_AMT_REL] || 0);
-        map[k].count++;
-    });
-    renderBarUi(id, map, totalVolume);
-}
-
-function renderBarUi(id, map, totalVolume) {
-    const sorted = Object.entries(map).sort((a,b) => b[1].amt - a[1].amt).slice(0, 10);
-    const max = sorted[0]?.[1].amt || 1;
-    let catAmt = 0, catCnt = 0;
-    Object.values(map).forEach(v => { catAmt += v.amt; catCnt += v.count; });
-    let html = sorted.map(([k, v]) => `
-        <div class="bar-item">
-            <div class="bar-
-            "><div class="bar-label">${k}</div><div class="bar-count">${v.count} Accts</div></div>
-            <div class="bar-track"><div class="bar-fill" style="width:${(v.amt/max)*100}%"></div></div>
-            <div class="bar-bottom">
-                <div class="bar-amt">${peso(v.amt)}</div>
-                <div class="bar-pct">${totalVolume > 0 ? ((v.amt/totalVolume)*100).toFixed(1) : 0}%</div>
-            </div>
-        </div>
-    `).join('');
-    if(html) {
-        html += `<div class="bar-item bar-item-total">
-            <div class="bar-top"><div class="bar-label" style="font-weight:800">TOTAL</div><div class="bar-count" style="font-weight:800;color:var(--navy)">${catCnt} Accounts</div></div>
-            <div class="bar-bottom" style="margin-top:5px"><div class="bar-amt" style="font-weight:800">${peso(catAmt)}</div><div class="bar-pct" style="font-weight:800;color:var(--navy)">${totalVolume > 0 ? ((catAmt/totalVolume)*100).toFixed(1) : 0}%</div></div>
-        </div>`;
-    }
-    $(id).innerHTML = html || '<div style="padding:20px;text-align:center;font-size:12px">No data</div>';
-}
-
-function renderSalesTable(data, totalVolume) {
-    const map = {};
-    data.forEach(c => {
-        const off = c.f[F_ASSIGNED] || 'Unassigned';
-        if(!map[off]) map[off] = {cnt: 0, amt: 0, pn: 0};
-        map[off].cnt++; map[off].amt += (c.f[F_AMT_REL] || 0); map[off].pn += (c.f[F_PN_VAL] || 0);
-    });
-    let sumCnt = 0, sumAmt = 0, sumPn = 0;
-    const rows = Object.entries(map).sort((a,b) => b[1].cnt - a[1].cnt);
-    let html = rows.map(([off, v]) => {
-        sumCnt += v.cnt; sumAmt += v.amt; sumPn += v.pn;
-        return `<tr><td>${off}</td><td>${v.cnt}</td><td>${peso(v.amt)}</td><td>${peso(v.pn)}</td><td>${peso(v.amt/v.cnt)}</td><td style="font-weight:700;color:var(--brand)">${totalVolume > 0 ? ((v.amt/totalVolume)*100).toFixed(1) : 0}%</td></tr>`;
-    }).join('');
-    if(html) html += `<tr class="tr-total"><td>GRAND TOTAL</td><td>${sumCnt}</td><td>${peso(sumAmt)}</td><td>${peso(sumPn)}</td><td>${sumCnt > 0 ? peso(sumAmt/sumCnt) : '₱0'}</td><td>${totalVolume > 0 ? ((sumAmt/totalVolume)*100).toFixed(1) : 0}%</td></tr>`;
-    $('table-sales').querySelector('tbody').innerHTML = html;
-}
-
-function renderRecentTable(data) {
-    const sorted = [...data].sort((a,b) => new Date(b.f[F_DT_REL] || b.date) - new Date(a.f[F_DT_REL] || a.date)).slice(0, 15);
-    $('main-table').querySelector('tbody').innerHTML = sorted.map(c => `
-        <tr>
-            <td style="font-weight:700">${c.name}</td>
-            <td style="color:var(--brand);font-weight:700">${peso(c.f[F_AMT_REL])}</td>
-            <td>${peso(c.f[F_PN_VAL])}</td>
-            <td>${c.f[F_ASSIGNED] || '---'}</td>
-            <td><span style="background:#FEE2E2;color:#B91C1C;padding:2px 8px;border-radius:4px;font-weight:700;font-size:10px">${c.f[F_SOURCE] || 'Direct'}</span></td>
-            <td>${c.f[F_DT_APPR] ? new Date(c.f[F_DT_APPR]).toLocaleDateString() : '---'}</td>
-            <td>${c.f[F_DT_REL] ? new Date(c.f[F_DT_REL]).toLocaleDateString() : '---'}</td>
-            <td>${c.f[F_DT_FUL] ? new Date(c.f[F_DT_FUL]).toLocaleDateString() : '---'}</td>
-        </tr>
-    `).join('');
-}
-
-function exportData() {
-    const relData = currentTab === 'alltime' ? allCards : allCards.filter(c => {const d = new Date(c.f[F_DT_REL] || c.date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === `${viewYear}-${String(viewMonth).padStart(2,'0')}`;});
-    let csv = "Account Name,Amount Released,PN Value,Assigned To,Lead Source,Date Approved,Date Released,Date Fulfilled\n";
-    relData.forEach(c => { csv += `"${c.name}",${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0},"${c.f[F_ASSIGNED]||'---'}","${c.f[F_SOURCE]||'Direct'}",${c.f[F_DT_APPR]||'---'},${c.f[F_DT_REL]||'---'},${c.f[F_DT_FUL]||'---'}\n`;});
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    link.setAttribute("href", URL.createObjectURL(blob));
-    link.setAttribute("download", `GD_Report.csv`);
-    link.click();
-}
-
-function switchTab(t) { currentTab = t; $('view-title').textContent = t === 'alltime' ? 'Executive Overview' : 'Monthly Performance'; document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); $(`nav-${t}`).classList.add('active'); $('month-selector').style.display = t === 'monthly' ? 'flex' : 'none'; render(); }
+function switchTab(t) { currentTab = t; $('view-title').textContent = t === 'alltime' ? 'Executive Overview' : 'Monthly Performance'; document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); $(`nav-${t}`).classList.add('active'); $('month-selector').style.display = t === 'monthly' ? 'flex' : 'none'; $('recent-panel').style.display = t === 'monthly' ? 'block' : 'none'; render(); }
 function changeMonth(d) { viewMonth += d; if(viewMonth > 12) { viewMonth = 1; viewYear++; } if(viewMonth < 1) { viewMonth = 12; viewYear--; } $('current-month-display').textContent = new Date(viewYear, viewMonth - 1).toLocaleString('default', {month:'long', year:'numeric'}); render(); }
 async function fetchTrello(path) { const k = localStorage.getItem('tr_key'), t = localStorage.getItem('tr_token'); const r = await fetch(`https://api.trello.com/1/${path}${path.includes('?')?'&':'?'}key=${k}&token=${t}`); return r.json(); }
 function showCfg() { $('cfg-modal').style.display = 'flex'; }
 function saveCfg() { localStorage.setItem('tr_key', $('api-key').value); localStorage.setItem('tr_token', $('api-token').value); $('cfg-modal').style.display = 'none'; loadAll(); }
+function exportFullData() {
+    const data = currentTab === 'alltime' ? allCards : allCards.filter(c => { const d = new Date(c.f[F_DT_REL] || c.date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === `${viewYear}-${String(viewMonth).padStart(2,'0')}`; });
+    let csv = "Name,Received,Approved,Released,Fulfilled,LeadSource,Dealer,Referror,ApprAmt,RelAmt,PNVal\n";
+    data.forEach(c => { csv += `"${c.name}",${c.f[F_DT_REC]},${c.f[F_DT_APPR]},${c.f[F_DT_REL]},${c.f[F_DT_FUL]},"${c.f[F_SOURCE]}","${c.f[F_DEALER]}","${c.f[F_REFERROR]}",${c.f[F_AMT_APPR]||0},${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0}\n`; });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'GFI BI Dashboard.csv'; link.click();
+}
 loadAll();
 </script>
 </body>
