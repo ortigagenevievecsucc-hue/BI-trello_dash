@@ -205,7 +205,7 @@ const F_PN_VAL   = "67b7f6ec5cbc27f8b1781321";
 const F_ASSIGNED = "67b7ea6efccc1a975bf9cde7";
 const F_UNIT1    = "6944ea0a722b59a595bafb00";
 const F_UNIT11   = "697853855b999f5c38ffb2ca";
-const F_DEALER   = "699d6d4c103a296b18b0c053";
+let F_DEALER     = "699d6d4c103a296b18b0c053"; // Using let here so it updates accurately via Trello dynamically
 const F_RESIDENCE= "67d3875f93411d0363e766fd";
 const F_INDUSTRY = "6826b605619b34a8db6f8f0e";
 const F_DT_REC   = "67b7e9eff8ff295aa18bea58";
@@ -308,7 +308,16 @@ async function loadAll() {
         const boardInfo = await fetchTrello(`lists/67b7e78831bce247eba60d1b?fields=idBoard`);
         const cfDefs = await fetchTrello(`boards/${boardInfo.idBoard}/customFields`);
         fieldOptions = {};
-        cfDefs.forEach(d => { if (d.type === 'list') { fieldOptions[d.id] = {}; (d.options ||[]).forEach(o => fieldOptions[d.id][o.id] = o.value.text); } });
+        cfDefs.forEach(d => { 
+            if (d.type === 'list') { 
+                fieldOptions[d.id] = {}; 
+                (d.options ||[]).forEach(o => fieldOptions[d.id][o.id] = o.value.text); 
+            }
+            // Automatically find the correct Custom Field ID for Dealer to pull actual performance
+            if (d.name && d.name.toLowerCase().includes('dealer')) {
+                F_DEALER = d.id;
+            }
+        });
         const raw = await fetchTrello(`lists/67b7e78831bce247eba60d1b/cards?customFieldItems=true&fields=name,dateLastActivity&limit=1000`);
         allCards = raw.map(c => parseCard(c));
         const prodLists = ['67b7e78831bce247eba60d1b', '67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611'];
@@ -348,7 +357,6 @@ function classifyRegion(addr) {
     for(let reg in regionKeywords) { if(regionKeywords[reg].some(k => a.includes(k))) return reg; }
     return "OTHERS / UNSPECIFIED";
 }
-
 
 // Convert string to Title Case while keeping prepositions lowercase and fixing Roman Numerals
 function formatLabelCase(str) {
@@ -641,8 +649,8 @@ function showCfg() { $('cfg-modal').style.display = 'flex'; }
 function saveCfg() { localStorage.setItem('tr_key', $('api-key').value); localStorage.setItem('tr_token', $('api-token').value); $('cfg-modal').style.display = 'none'; loadAll(); }
 function exportFullData() {
     const data = currentTab === 'alltime' ? allCards : allCards.filter(c => { const d = new Date(c.f[F_DT_REL] || c.date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === `${viewYear}-${String(viewMonth).padStart(2,'0')}`; });
-    let csv = "Name,Received,Approved,Released,Fulfilled,LeadSource,Dealer,Referror,ApprAmt,RelAmt,PNVal\n";
-    data.forEach(c => { csv += `"${c.name}",${c.f[F_DT_REC]},${c.f[F_DT_APPR]},${c.f[F_DT_REL]},${c.f[F_DT_FUL]},"${c.f[F_SOURCE]}","${c.f[F_DEALER]}","${c.f[F_REFERROR]}",${c.f[F_AMT_APPR]||0},${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0}\n`; });
+    let csv = "Name,Received,Approved,Released,Fulfilled,Lead Source,Dealer,Referror,Assigned To,Approved Amount,Released Amount,PN Value\n";
+    data.forEach(c => { csv += `"${c.name}",${c.f[F_DT_REC]},${c.f[F_DT_APPR]},${c.f[F_DT_REL]},${c.f[F_DT_FUL]},"${c.f[F_SOURCE]}","${c.f[F_DEALER]}","${c.f[F_REFERROR]}","${c.f[F_ASSIGNED]}",${c.f[F_AMT_APPR]||0},${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0}\n`; });
     const blob = new Blob([csv], { type: 'text/csv' });
     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'GFI BI Dashboard.csv'; link.click();
 }
