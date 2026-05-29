@@ -122,8 +122,8 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:13px; col
 
     <div id="kpi-grid" class="kpi-grid">
         <div class="kpi-card"><div class="kpi-lbl">Accounts Released</div><div class="kpi-val" id="kpi-rel-count">0</div><div class="kpi-sub">Total funded units</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">Prod. Accounts</div><div class="kpi-val" id="kpi-prod-count">0</div><div class="kpi-sub">Active approved pipeline</div></div>
-        <div class="kpi-card"><div class="kpi-lbl">Released Conversion</div><div class="kpi-val" id="kpi-conv">0%</div><div class="kpi-sub">Approved vs Released</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Prod. Accounts</div><div class="kpi-val" id="kpi-prod-count">0</div><div class="kpi-sub">Total Approved Pipeline</div></div>
+        <div class="kpi-card"><div class="kpi-lbl">Released Conversion</div><div class="kpi-val" id="kpi-conv">0%</div><div class="kpi-sub">Released vs Approved</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Avg. Org. (TAT)</div><div class="kpi-val" id="kpi-tat-fulf">0.0 d</div><div class="kpi-sub">Receive &rarr; Fulfilled, Business days</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Received to Approved (TAT)</div><div class="kpi-val" id="kpi-tat-appr">0.0 d</div><div class="kpi-sub">Business days</div></div>
         <div class="kpi-card"><div class="kpi-lbl">Lead Conversion Rate</div><div class="kpi-val" id="kpi-lead-conv">0%</div><div class="kpi-sub" id="lead-conv-sub">Leads vs Released</div></div>
@@ -163,7 +163,9 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:13px; col
             <div class="ph"><h3>Sales Performance</h3></div>
             <div style="overflow-x:auto;">
                 <table id="table-sales">
-                    <thead><tr><th>Assigned To</th><th>Released Accounts</th><th>Total Released</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr></thead>
+                    <thead id="table-sales-head">
+                        <tr><th>Assigned To</th><th>Released Accounts</th><th>Total Released</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr>
+                    </thead>
                     <tbody id="table-sales-body"></tbody>
                 </table>
             </div>
@@ -171,10 +173,12 @@ td{padding:12px 20px; border-bottom:1px solid var(--border); font-size:13px; col
         </div>
 
         <div class="panel" id="recent-panel" style="display:none">
-            <div class="ph"><h3>Recent High-Value Releases</h3></div>
+            <div class="ph"><h3>Recent High-Value Accounts</h3></div>
             <div style="overflow-x:auto">
                 <table id="main-table">
-                    <thead><tr><th>Account Name</th><th>Amount</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th><th>Date Fulfilled</th></tr></thead>
+                    <thead id="main-table-head">
+                        <tr><th>Account Name</th><th>Status</th><th>Amount</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th></tr>
+                    </thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -200,7 +204,7 @@ const F_PN_VAL   = "67b7f6ec5cbc27f8b1781321";
 const F_ASSIGNED = "67b7ea6efccc1a975bf9cde7";
 const F_UNIT1    = "6944ea0a722b59a595bafb00";
 const F_UNIT11   = "697853855b999f5c38ffb2ca";
-let F_DEALER     = "699d6d4c103a296b18b0c053"; // Dynamically bound if Trello name changes
+let F_DEALER     = "699d6d4c103a296b18b0c053"; 
 const F_RESIDENCE= "67d3875f93411d0363e766fd";
 const F_INDUSTRY = "6826b605619b34a8db6f8f0e";
 const F_DT_REC   = "67b7e9eff8ff295aa18bea58";
@@ -250,8 +254,15 @@ function calculateBusinessDays(start, end) {
     return count;
 }
 
+// STRICT DATE EXTRACTOR: Ignores Timezone shifting entirely
+function getYM(dateStr) {
+    if (!dateStr) return null;
+    return typeof dateStr === 'string' ? dateStr.substring(0, 7) : null;
+}
+
 let currentTab = 'alltime', viewYear = 2026, viewMonth = 5, chartMode = 'rel';
-let allCards = [], allProdCards = [], boardLeads = [], fieldOptions = {}, refreshSecs = 60, syncTimer = null;
+let globalCards = [], boardLeads = [], fieldOptions = {}, refreshSecs = 60, syncTimer = null;
+let listMap = { released: [], collections: [], mcdropa: [], approved: [], cancelled: [] };
 
 const $ = id => document.getElementById(id);
 const peso = n => n ? '₱' + Math.round(n).toLocaleString('en-PH') : '₱0';
@@ -266,23 +277,17 @@ function startSyncTimer() {
     }, 1000);
 }
 
-// Robust Fetch Wrapper to prevent throwing unhandled errors blocking execution
 async function fetchTrello(path) { 
     const k = localStorage.getItem('tr_key'), t = localStorage.getItem('tr_token'); 
     try {
         const r = await fetch(`https://api.trello.com/1/${path}${path.includes('?')?'&':'?'}key=${k}&token=${t}`); 
-        if(!r.ok) {
-            console.error(`Trello API failed for ${path}: ${r.statusText}`);
-            return null;
-        }
+        if(!r.ok) return null;
         return await r.json(); 
     } catch(err) {
-        console.error(`Network or Parsing error on ${path}`, err);
         return null;
     }
 }
 
-// Optimized Ultra-Fast Loading Logic (Loads within ~1 second)
 async function loadAll() {
     const key = localStorage.getItem('tr_key'), token = localStorage.getItem('tr_token');
     if(!key || !token) { showCfg(); return; }
@@ -291,19 +296,15 @@ async function loadAll() {
     $('refresh-indicator').style.color = 'var(--brand)';
 
     try {
-        // Step 1: Get Board ID quickly (1 API call)
         const boardInfo = await fetchTrello(`lists/67b7e78831bce247eba60d1b?fields=idBoard`);
         if(!boardInfo || !boardInfo.idBoard) throw new Error("Could not retrieve Valid Board Data.");
         const idBoard = boardInfo.idBoard;
 
-        // Step 2: Fetch Everything Else in Parallel (3 API calls only, completely bypassing the sequential delays)
-        const [cfDefs, boardLists, allRawCards] = await Promise.all([
+        const [cfDefs, boardLists] = await Promise.all([
             fetchTrello(`boards/${idBoard}/customFields`),
-            fetchTrello(`boards/${idBoard}/lists?fields=name,id`),
-            fetchTrello(`boards/${idBoard}/cards?customFieldItems=true&fields=name,dateLastActivity,idList`)
+            fetchTrello(`boards/${idBoard}/lists?fields=name,id`)
         ]);
 
-        // Map Custom Fields properly 
         fieldOptions = {};
         if (Array.isArray(cfDefs)) {
             cfDefs.forEach(d => { 
@@ -315,27 +316,47 @@ async function loadAll() {
             });
         }
 
-        // Identify Released & Collection Target Lists precisely
-        const targetNamesNormalized = ["released", "collectionpaying", "collectionpd", "collectionnpl", "mcdropa"];
-        const targetListIds = Array.isArray(boardLists) ? boardLists.filter(l => l.name && targetNamesNormalized.includes(l.name.toLowerCase().replace(/[\s-]/g, ''))).map(l => l.id) : [];
+        // Map list categories accurately and build a listName lookup map
+        listMap = { released: [], collections: [], mcdropa: [], approved: [], cancelled: [] };
+        const listNameMap = {};
         
-        if (!targetListIds.includes('67b7e78831bce247eba60d1b')) targetListIds.push('67b7e78831bce247eba60d1b');
+        if (Array.isArray(boardLists)) {
+            boardLists.forEach(l => {
+                if(!l.name) return;
+                listNameMap[l.id] = l.name; // Keep accurate list name for CSV Status Extraction
+                const n = l.name.toLowerCase().replace(/[\s-]/g, ''); 
+                
+                // STRICT MAPPING to filter out generic "Cancelled" pre-approval accounts
+                if (n.includes('released')) listMap.released.push(l.id);
+                else if (n.includes('collection')) listMap.collections.push(l.id);
+                else if (n.includes('mcdropa')) listMap.mcdropa.push(l.id);
+                else if (n.includes('cancelapproved') || n.includes('cancelledapproved')) listMap.cancelled.push(l.id);
+                else if (n.includes('approved') || n.includes('processing') || n.includes('pipeline')) listMap.approved.push(l.id);
+            });
+        }
+
+        if(listMap.released.length === 0) listMap.released.push('67b7e78831bce247eba60d1b');
+        if(listMap.approved.length === 0) listMap.approved.push('67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611');
+
+        // Compile ONLY lists strictly defining the pipeline. 
+        // Eliminates general 'Cancelled', 'Declined', 'AGD ROPA', etc. from polluting the data.
+        const allNeededLists = [...new Set([
+            ...listMap.released, 
+            ...listMap.collections, 
+            ...listMap.mcdropa, 
+            ...listMap.approved, 
+            ...listMap.cancelled
+        ])];
+
+        const cardPromises = allNeededLists.map(lId => 
+            fetchTrello(`lists/${lId}/cards?customFieldItems=true&fields=name,idList&limit=1000`)
+        );
+        const cardResults = await Promise.all(cardPromises);
         
-        const baseProdLists = ['67b7e77833cbff008cf61cc6', '67bd7243563b580ea3b49611'];
-        const allProdListIds = [...new Set([...baseProdLists, ...targetListIds])];
+        globalCards = cardResults.filter(Array.isArray).flat().map(c => parseCard(c, listNameMap)).filter(Boolean);
 
-        // Parse and filter data directly in memory for ultimate speed
-        allCards = [];
-        allProdCards = [];
-        boardLeads = Array.isArray(allRawCards) ? allRawCards : [];
-
-        boardLeads.forEach(raw => {
-            const parsed = parseCard(raw);
-            if(parsed) {
-                if(targetListIds.includes(raw.idList)) allCards.push(parsed);
-                if(allProdListIds.includes(raw.idList)) allProdCards.push(parsed);
-            }
-        });
+        const leadsRes = await fetchTrello(`boards/${idBoard}/cards?fields=id`);
+        boardLeads = Array.isArray(leadsRes) ? leadsRes : [];
 
         render();
 
@@ -351,7 +372,7 @@ async function loadAll() {
     }
 }
 
-function parseCard(c) {
+function parseCard(c, listNameMap) {
     if(!c || !c.id) return null;
     const f = {};
     (c.customFieldItems ||[]).forEach(i => {
@@ -361,7 +382,8 @@ function parseCard(c) {
         else if(i.idValue && fieldOptions[i.idCustomField]) f[i.idCustomField] = fieldOptions[i.idCustomField][i.idValue];
     });
     f.created = new Date(parseInt(c.id.substring(0,8), 16) * 1000);
-    return { id: c.id, name: c.name, f, date: c.dateLastActivity };
+    // Bind list name explicitly as Status
+    return { id: c.id, name: c.name, f: f, idList: c.idList, statusName: listNameMap[c.idList] || 'Unknown' };
 }
 
 function classifyRegion(addr) {
@@ -388,20 +410,39 @@ function formatLabelCase(str) {
     return t;
 }
 
+window.currentExportData = [];
+
 function render() {
     const targetYM = `${viewYear}-${String(viewMonth).padStart(2,'0')}`;
     
-    // As requested: Pulls the data of Accounts Released and Amount Released from the target lists defined above
-    const relData = currentTab === 'alltime' 
-        ? allCards 
-        : allCards.filter(c => { 
-            const d = new Date(c.f[F_DT_REL] || c.date || c.f.created);
-            if(isNaN(d)) return false;
-            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; 
-          });
+    // ----------------------------------------------------------------------
+    // RELEASED LOGIC: Target specific lists
+    // ----------------------------------------------------------------------
+    const targetRelLists = [...listMap.released, ...listMap.collections, ...listMap.mcdropa];
+    const relBase = globalCards.filter(c => targetRelLists.includes(c.idList));
 
-    const prodData = currentTab === 'alltime' ? allProdCards : allProdCards.filter(c => { const d = new Date(c.f[F_DT_APPR] || c.f[F_DT_REL] || c.f.created); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; });
-    let leadCount = currentTab === 'alltime' ? boardLeads.length : boardLeads.filter(c => { const d = new Date(parseInt(c.id.substring(0,8), 16) * 1000); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; }).length;
+    const relData = currentTab === 'alltime' 
+        ? relBase.filter(c => c.f[F_DT_REL]) 
+        : relBase.filter(c => getYM(c.f[F_DT_REL]) === targetYM); 
+
+    // ----------------------------------------------------------------------
+    // PRODUCTION LOGIC: Pulls purely by the presence of Approved Date. 
+    // globalCards already explicitly stripped out bad lists ensuring exactly active Pipeline
+    // ----------------------------------------------------------------------
+    const prodData = currentTab === 'alltime' 
+        ? globalCards.filter(c => c.f[F_DT_APPR]) 
+        : globalCards.filter(c => getYM(c.f[F_DT_APPR]) === targetYM); 
+          
+    // Merges both to ensure 100% of pipeline is extracted when Exporting CSV
+    // This allows you to track Production Data alongside Releases efficiently!
+    window.currentExportData = Array.from(new Map([...prodData, ...relData].map(c => [c.id, c])).values());
+
+    let leadCount = currentTab === 'alltime' 
+        ? boardLeads.length 
+        : boardLeads.filter(c => { 
+            const d = new Date(parseInt(c.id.substring(0,8), 16) * 1000); 
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === targetYM; 
+          }).length;
 
     const totalRelVol = relData.reduce((a,c) => a + (c.f[F_AMT_REL] || 0), 0);
     const totalProdVol = prodData.reduce((a,c) => a + (c.f[F_AMT_APPR] || 0), 0);
@@ -409,7 +450,9 @@ function render() {
     
     $('kpi-rel-count').textContent = relData.length.toLocaleString();
     $('kpi-prod-count').textContent = prodData.length.toLocaleString();
-    $('kpi-conv').textContent = (prodData.length > 0 ? (relData.length/prodData.length)*100 : 0).toFixed(1) + '%';
+    
+    $('kpi-conv').textContent = (prodData.length > 0 ? (relData.length / prodData.length) * 100 : 0).toFixed(1) + '%';
+    
     $('kpi-lead-conv').textContent = (leadCount > 0 ? (relData.length/leadCount)*100 : 0).toFixed(1) + '%';
     $('kpi-rel-vol').textContent = peso(totalRelVol);
     $('kpi-prod-vol').textContent = peso(totalProdVol);
@@ -429,21 +472,26 @@ function render() {
     $('kpi-tat-appr-rel').textContent = tat.apprRel.c ? (tat.apprRel.s / tat.apprRel.c).toFixed(1) + ' d' : '---';
     $('kpi-tat-fulf').textContent = tat.recFulf.c ? (tat.recFulf.s / tat.recFulf.c).toFixed(1) + ' d' : '---';
 
-    const baseline = relData.length;
-    renderBarUi('list-units', 'total-units', mapCombinedUnits(relData), baseline);
-    renderBarUi('list-sources', 'total-sources', mapGeneral(relData, F_SOURCE), baseline);
-    renderBarUi('list-regions', 'total-regions', mapRegions(relData), baseline);
-    renderBarUi('list-dealers', 'total-dealers', mapGeneral(relData, F_DEALER), baseline);
-    renderBarUi('list-industry', 'total-industry', mapGeneral(relData, F_INDUSTRY), baseline);
+    // ----------------------------------------------------------------------
+    // UI REFRESH: Dynamic Chart Loading (Production vs Released Switcher)
+    // ----------------------------------------------------------------------
+    const displayData = chartMode === 'rel' ? relData : prodData;
+    const baseline = displayData.length;
     
-    renderSales(relData, baseline);
-    renderRecent(relData);
+    renderBarUi('list-units', 'total-units', mapCombinedUnits(displayData, chartMode), baseline, chartMode);
+    renderBarUi('list-sources', 'total-sources', mapGeneral(displayData, F_SOURCE, chartMode), baseline, chartMode);
+    renderBarUi('list-regions', 'total-regions', mapRegions(displayData, chartMode), baseline, chartMode);
+    renderBarUi('list-dealers', 'total-dealers', mapGeneral(displayData, F_DEALER, chartMode), baseline, chartMode);
+    renderBarUi('list-industry', 'total-industry', mapGeneral(displayData, F_INDUSTRY, chartMode), baseline, chartMode);
+    
+    renderSales(displayData, baseline, chartMode);
+    renderRecent(displayData, chartMode);
 
     $('trend-panel').style.display = 'flex';
     if(currentTab === 'alltime') {
         $('chart-panel-title').textContent = 'Performance Trend';
         $('chart-toggles').style.display = 'flex';
-        renderTrend(); 
+        renderTrend(relData, prodData); 
     } else {
         $('chart-panel-title').textContent = 'Weekly Release Breakdown';
         $('chart-toggles').style.display = 'none';
@@ -451,36 +499,39 @@ function render() {
     }
 }
 
-function mapCombinedUnits(data) {
+function mapCombinedUnits(data, mode) {
     const m = {};
+    const amtField = mode === 'rel' ? F_AMT_REL : F_AMT_APPR;
     data.forEach(c => {
         [c.f[F_UNIT1], c.f[F_UNIT11]].forEach(u => {
             if(!u || u === 'Unknown' || u === '--') return;
-            if(!m[u]) m[u] = {a:0, c:0}; m[u].a += (c.f[F_AMT_REL]||0); m[u].c++;
+            if(!m[u]) m[u] = {a:0, c:0}; m[u].a += (c.f[amtField]||0); m[u].c++;
         });
     });
     return m;
 }
 
-function mapGeneral(data, fid) {
+function mapGeneral(data, fid, mode) {
     const m = {};
+    const amtField = mode === 'rel' ? F_AMT_REL : F_AMT_APPR;
     data.forEach(c => {
         const k = c.f[fid]; if(!k || k==='Unknown' || k==='Select...' || k==='null') return;
-        if(!m[k]) m[k] = {a:0, c:0}; m[k].a += (c.f[F_AMT_REL]||0); m[k].c++;
+        if(!m[k]) m[k] = {a:0, c:0}; m[k].a += (c.f[amtField]||0); m[k].c++;
     });
     return m;
 }
 
-function mapRegions(data) {
+function mapRegions(data, mode) {
     const m = {};
+    const amtField = mode === 'rel' ? F_AMT_REL : F_AMT_APPR;
     data.forEach(c => {
         const r = classifyRegion(c.f[F_RESIDENCE]); if(!r) return;
-        if(!m[r]) m[r] = {a:0, c:0}; m[r].a += (c.f[F_AMT_REL]||0); m[r].c++;
+        if(!m[r]) m[r] = {a:0, c:0}; m[r].a += (c.f[amtField]||0); m[r].c++;
     });
     return m;
 }
 
-function renderBarUi(lid, tid, map, base) {
+function renderBarUi(lid, tid, map, base, mode) {
     let sorted = Object.entries(map).sort((a,b) => b[1].c - a[1].c);
     let sumA = 0, sumC = 0; Object.values(map).forEach(v => { sumA += v.a; sumC += v.c; });
     $(lid).innerHTML = sorted.map(([k,v]) => `
@@ -492,39 +543,60 @@ function renderBarUi(lid, tid, map, base) {
     $(tid).innerHTML = `<div class="total-header-row"><div class="total-lbl-main">TOTAL DATA POINTS</div><div class="total-count-main">${sumC} Accounts</div></div><div class="total-data-row"><div class="total-amt-main">${peso(sumA)}</div><div class="total-num">${base ? ((sumC/base)*100).toFixed(1) : 0}%</div></div>`;
 }
 
-function renderSales(data, base) {
+function renderSales(data, base, mode) {
     const m = {};
+    const amtField = mode === 'rel' ? F_AMT_REL : F_AMT_APPR;
+    
     data.forEach(c => {
         const o = c.f[F_ASSIGNED]; if(!o || o==='Unassigned') return;
-        if(!m[o]) m[o] = {c:0, a:0, p:0}; m[o].c++; m[o].a += (c.f[F_AMT_REL]||0); m[o].p += (c.f[F_PN_VAL]||0);
+        if(!m[o]) m[o] = {c:0, a:0, p:0}; m[o].c++; m[o].a += (c.f[amtField]||0); m[o].p += (c.f[F_PN_VAL]||0);
     });
+    
     const s = Object.entries(m).sort((a,b) => b[1].c - a[1].c);
     let sa=0, sc=0, sp=0;
+    
+    $('table-sales-head').innerHTML = `<tr><th>Assigned To</th><th>${mode === 'rel' ? 'Released Accounts' : 'Approved Accounts'}</th><th>${mode === 'rel' ? 'Total Released' : 'Total Approved'}</th><th>Total PN Value</th><th>Avg/Account</th><th>Volume %</th></tr>`;
+    
     $('table-sales-body').innerHTML = s.map(([o,v]) => {
         sa += v.a; sc += v.c; sp += v.p;
         return `<tr><td>${o}</td><td>${v.c}</td><td>${peso(v.a)}</td><td>${peso(v.p)}</td><td>${v.c?peso(v.a/v.c):0}</td><td style="font-weight:900;color:var(--brand)">${base?((v.c/base)*100).toFixed(1):0}%</td></tr>`;
     }).join('');
-    const footer = `<div class="total-header-row"><div class="total-lbl-main">GRAND TOTAL</div><div class="total-count-main">${sc} Accounts</div></div><div class="total-data-row"><div class="total-amt-main">${peso(sa)}</div><div class="total-num">${base ? ((sc/base)*100).toFixed(1) : 0}%</div></div>`;
-    $('total-sales').innerHTML = footer;
+    
+    $('total-sales').innerHTML = `<div class="total-header-row"><div class="total-lbl-main">GRAND TOTAL</div><div class="total-count-main">${sc} Accounts</div></div><div class="total-data-row"><div class="total-amt-main">${peso(sa)}</div><div class="total-num">${base ? ((sc/base)*100).toFixed(1) : 0}%</div></div>`;
 }
 
-function renderRecent(data) {
-    const s = [...data].sort((a,b) => new Date(b.f[F_DT_REL]||b.date) - new Date(a.f[F_DT_REL]||a.date)).slice(0, 15);
-    $('main-table').querySelector('tbody').innerHTML = s.map(c => `<tr><td>${c.name}</td><td>${peso(c.f[F_AMT_REL])}</td><td>${peso(c.f[F_PN_VAL])}</td><td>${c.f[F_ASSIGNED]||'---'}</td><td>${c.f[F_SOURCE]||'---'}</td><td>${c.f[F_DT_APPR]||'---'}</td><td>${c.f[F_DT_REL]||'---'}</td><td>${c.f[F_DT_FUL]||'---'}</td></tr>`).join('');
+function renderRecent(data, mode) {
+    const dtField = mode === 'rel' ? F_DT_REL : F_DT_APPR;
+    const amtField = mode === 'rel' ? F_AMT_REL : F_AMT_APPR;
+    
+    const s = [...data].filter(c => c.f[dtField]).sort((a,b) => new Date(b.f[dtField]) - new Date(a.f[dtField])).slice(0, 15);
+    
+    $('main-table-head').innerHTML = `<tr><th>Account Name</th><th>Status</th><th>${mode === 'rel' ? 'Released Amount' : 'Approved Amount'}</th><th>PN Value</th><th>Assigned To</th><th>Source</th><th>Date Approved</th><th>Date Released</th></tr>`;
+    
+    $('main-table').querySelector('tbody').innerHTML = s.map(c => `<tr><td>${c.name}</td><td><span style="background:var(--bg);padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700">${c.statusName}</span></td><td>${peso(c.f[amtField])}</td><td>${peso(c.f[F_PN_VAL])}</td><td>${c.f[F_ASSIGNED]||'---'}</td><td>${c.f[F_SOURCE]||'---'}</td><td>${c.f[F_DT_APPR]||'---'}</td><td>${c.f[F_DT_REL]||'---'}</td></tr>`).join('');
 }
 
-function setChartMode(m) { chartMode = m; document.querySelectorAll('.btn-toggle').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); renderTrend(); }
+function setChartMode(m) { 
+    chartMode = m; 
+    document.querySelectorAll('.btn-toggle').forEach(b=>b.classList.remove('active')); 
+    event.target.classList.add('active'); 
+    render(); 
+}
 
-function renderTrend() {
+function renderTrend(relData, prodData) {
     const ctx = $('mainChart').getContext('2d'); if(window.mInst) window.mInst.destroy();
     const m = {};
-    const ds = chartMode === 'rel' ? allCards : allProdCards;
+    const ds = chartMode === 'rel' ? relData : prodData;
 
     ds.forEach(c => {
-        const d = new Date(c.f[chartMode==='rel'?F_DT_REL:F_DT_APPR] || c.date || c.f.created); if(isNaN(d) || d < new Date(2025, 5, 1)) return;
-        const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+        const dateStr = c.f[chartMode==='rel'?F_DT_REL:F_DT_APPR]; 
+        if(!dateStr) return;
+        const k = getYM(dateStr);
+        if(!k || k < '2025-05') return;
+        
         if(!m[k]) m[k]={a:0, c:0}; m[k].a += (c.f[chartMode==='rel'?F_AMT_REL:F_AMT_APPR]||0); m[k].c++;
     });
+    
     const sk = Object.keys(m).sort();
     window.mInst = new Chart(ctx, {
         type:'line', data: {
@@ -566,7 +638,10 @@ function renderWeeklyChart(data) {
     }
 
     data.forEach(c => {
-        const d = new Date(c.f[F_DT_REL] || c.date || c.f.created).getDate();
+        const dateStr = c.f[F_DT_REL];
+        if(!dateStr) return;
+        const d = parseInt(dateStr.substring(8,10), 10);
+        
         const wk = w.find(x => d >= x.s && d <= x.e); 
         if(wk){ wk.a += (c.f[F_AMT_REL]||0); wk.c++; }
     });
@@ -593,20 +668,22 @@ function switchTab(t) { currentTab = t; $('view-title').textContent = t === 'all
 function changeMonth(d) { viewMonth += d; if(viewMonth > 12) { viewMonth = 1; viewYear++; } if(viewMonth < 1) { viewMonth = 12; viewYear--; } $('current-month-display').textContent = new Date(viewYear, viewMonth - 1).toLocaleString('default', {month:'long', year:'numeric'}); render(); }
 function showCfg() { $('cfg-modal').style.display = 'flex'; }
 function saveCfg() { localStorage.setItem('tr_key', $('api-key').value); localStorage.setItem('tr_token', $('api-token').value); $('cfg-modal').style.display = 'none'; loadAll(); }
+
 function exportFullData() {
-    const data = currentTab === 'alltime' ? allCards : allCards.filter(c => { const d = new Date(c.f[F_DT_REL] || c.date || c.f.created); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === `${viewYear}-${String(viewMonth).padStart(2,'0')}`; });
-    let csv = "Name,Received,Approved,Released,Fulfilled,Lead Source,Dealer,Referror,Assigned To,Approved Amount,Released Amount,PN Value\n";
-    data.forEach(c => { csv += `"${c.name}",${c.f[F_DT_REC]||''},${c.f[F_DT_APPR]||''},${c.f[F_DT_REL]||''},${c.f[F_DT_FUL]||''},"${c.f[F_SOURCE]||''}","${c.f[F_DEALER]||''}","${c.f[F_REFERROR]||''}","${c.f[F_ASSIGNED]||''}",${c.f[F_AMT_APPR]||0},${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0}\n`; });
+    const data = window.currentExportData || [];
+    // STATUS INCLUDED IN CSV
+    let csv = "Name,Status,Date Received,Date Approved,DateReleased,Date Fulfilled,Lead Source,Name of Dealer,Referror,Assigned To,Approved Amount,Released Amount,PN Value\n";
+    data.forEach(c => { csv += `"${c.name}","${c.statusName}",${c.f[F_DT_REC]||''},${c.f[F_DT_APPR]||''},${c.f[F_DT_REL]||''},${c.f[F_DT_FUL]||''},"${c.f[F_SOURCE]||''}","${c.f[F_DEALER]||''}","${c.f[F_REFERROR]||''}","${c.f[F_ASSIGNED]||''}",${c.f[F_AMT_APPR]||0},${c.f[F_AMT_REL]||0},${c.f[F_PN_VAL]||0}\n`; });
     const blob = new Blob([csv], { type: 'text/csv' });
     const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'GFI BI Dashboard.csv'; link.click();
 }
 
-// Auto-Trigger Startup Logic
+// System Init
 const initKey = localStorage.getItem('tr_key'), initToken = localStorage.getItem('tr_token');
 if(!initKey || !initToken) {
-    showCfg(); // Show modal automatically if no credentials
+    showCfg(); 
 } else {
-    loadAll(); // Load data instantly directly instead of waiting for timer
+    loadAll(); 
 }
 
 </script>
